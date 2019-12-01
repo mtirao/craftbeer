@@ -3,9 +3,36 @@
 
 User
     ident Text
+    role Text
     password Text Maybe
     UniqueUser ident
     deriving Typeable
+Recipe
+    ident Text
+    UniqueRecipe ident
+    style Text
+    name Text
+    ibu Int
+    abv Int
+    color Int
+    deriving Typeable
+Ingredient
+    ident Text
+    UniqueIngredient ident
+    name Text
+    type Text
+    unit Int
+    deriving Typeable
+Detail
+    recipeId RecipeId
+    ingredientId IngredientId
+    quantity Int
+Stage
+    recipeId RecipeId
+    type Int
+    temp Int Maybe
+    time Int
+
 Email
     email Text
     userId UserId Maybe
