@@ -4,35 +4,45 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE DeriveGeneric         #-}
 
 module Handler.User where
 
-import Foundation
-import Data.Text (Text)
-import Yesod.Core
 
-data User = User
-    { first_name :: Text
-    , last_name  :: Text
-    , display_name :: Text
-    , username  :: Text
-    , status :: Maybe Text
-    , token_type  :: Text
-    , token :: Text
+import Import
+
+data LoginRequest = LoginRequest 
+    { user_id :: Text
+    , password  :: Text
     }
+    deriving (Show,Generic,Typeable) 
+instance FromJSON LoginRequest
+instance ToJSON LoginRequest
 
-instance ToJSON User where
-    toJSON User {..} = object
-        [ "first_name" .= first_name
-        , "last_name" .= last_name
-        , "display_name" .= display_name
-        , "username" .= username
-        , "status" .= status
-        , "token_type" .= token_type
-        , "token" .= token
-        ]
+
+data LoginResponse = LoginResponse
+    { message :: Text
+    }
+    deriving (Show,Generic) 
+instance FromJSON LoginResponse
+instance ToJSON LoginResponse
 
 
 postUserR  :: Handler Value
-postUserR = returnJson $ User "Marcos" "Tirao" "Marcos Tirao" "marcos.tirao@icloud.com" Nothing "JWT" "12345677890"
+postUserR = do 
+    user <- (requireJsonBody :: Handler User)
 
+    let user' = user {userRole = "brewmaster"}
+    insertedComment <- runDB $ insertEntity user'
+    returnJson $ insertedComment
+
+
+
+postLoginR :: Handler Value
+postLoginR = do
+    user <- (requireJsonBody :: Handler LoginRequest)
+    maybeUser <- runDB $ getBy $ UniqueUser (user_id user) --selectFirst [UserIdent ==. "mtirao"] []
+    case maybeUser of
+        Just user -> returnJson $ user
+        Nothing -> notFound
+    
