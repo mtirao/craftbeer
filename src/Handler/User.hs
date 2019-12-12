@@ -43,6 +43,6 @@ postLoginR = do
     user <- (requireJsonBody :: Handler LoginRequest)
     maybeUser <- runDB $ getBy $ UniqueUser (user_id user) --selectFirst [UserIdent ==. "mtirao"] []
     case maybeUser of
-        Just user -> returnJson $ user
+        Just user' -> returnJson $ user'
         Nothing -> notFound
     
