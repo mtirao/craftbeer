@@ -30,19 +30,28 @@ instance ToJSON LoginResponse
 
 postUserR  :: Handler Value
 postUserR = do 
-    user <- (requireJsonBody :: Handler User)
-
+    user <- (requireCheckJsonBody :: Handler User)
     let user' = user {userRole = "brewmaster"}
     insertedComment <- runDB $ insertEntity user'
     returnJson $ insertedComment
+
+passwordRequest :: LoginRequest -> Text
+passwordRequest (LoginRequest _ password) = password
+
+passwordEntity:: User -> Text
+passwordEntity (User _ _ password _) = case password of
+                                        Just pwd -> pwd
+                                        Nothing -> ""
 
 
 
 postLoginR :: Handler Value
 postLoginR = do
-    user <- (requireJsonBody :: Handler LoginRequest)
+    user <- (requireCheckJsonBody :: Handler LoginRequest)
     maybeUser <- runDB $ getBy $ UniqueUser (user_id user) --selectFirst [UserIdent ==. "mtirao"] []
     case maybeUser of
-        Just user' -> returnJson $ user'
+        Just (Entity _ user') -> if (passwordRequest user) == (passwordEntity user')
+                        then returnJson $ user'
+                        else permissionDenied "Invalid password"
         Nothing -> notFound
     
