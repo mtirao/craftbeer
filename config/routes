@@ -1,6 +1,0 @@
--- By default this file is used by `parseRoutesFile` in Foundation.hs
--- Syntax for this file here: https://www.yesodweb.com/book/routing-and-handlers
-
-
-/accounts/signup              UserR POST
-/accounts/login/              LoginR POST
