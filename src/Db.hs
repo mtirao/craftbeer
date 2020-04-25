@@ -101,6 +101,14 @@ insertArticle pool (Just (Article id title bodyText)) = do
                             "INSERT INTO article(title, bodyText) VALUES(?,?)"
      return ()
 
+insertUser :: Pool Connection -> Maybe User -> ActionT TL.Text IO ()
+insertUser pool Nothing = return ()
+insertUser pool (Just (User password user name lastname role)) = do
+     liftIO $ execSqlT pool [role, password, user, name, lastname]
+                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
+     return ()
+
+
 updateArticle :: Pool Connection -> Maybe Article -> ActionT TL.Text IO ()
 updateArticle pool Nothing = return ()
 updateArticle pool (Just (Article id title bodyText)) = do

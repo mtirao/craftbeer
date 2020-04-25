@@ -4,7 +4,6 @@ module Main where
 
 import Db
 import Views
-import Auth
 import Domain
 
 import Web.Scotty
@@ -54,13 +53,19 @@ main = do
           scotty 3000 $ do
               middleware $ staticPolicy (noDots >-> addBase "static") -- serve static files
               middleware $ logStdout                                  -- log all requests; for production use logStdout
-              middleware $ basicAuth (verifyCredentials pool)         -- check if the user is authenticated for protected resources
-                           "Haskell Blog Realm" { authIsProtected = protectedResources } -- function which restricts access to some routes only for authenticated users
+             
 
               -- AUTH
               post   "/accounts/login" $ do article <- getArticleParam -- read the request body, try to parse it into article
                                             insertArticle pool article -- insert the parsed article into the DB
                                             createdArticle article     -- show info that the article was created
+
+              post "/accounts/signup" $ do  user <- getUserParam
+                                            insertUser pool user
+                                            createdUser user
+
+
+
               
               -- LIST
               get    "/articles" $ do articles <- liftIO $ listArticles pool  -- get the ist of articles for DB
@@ -92,11 +97,15 @@ main = do
 getArticleParam :: ActionT TL.Text IO (Maybe Article)
 getArticleParam = do b <- body
                      return $ (decode b :: Maybe Article)
-                     where makeArticle s = ""
 
--- Parse the request body into the Article
+-- Parse the request body into the Login
 getLoginParam :: ActionT TL.Text IO (Maybe Login)
 getLoginParam = do 
                     b <- body
                     return $ (decode b :: Maybe Login)
-                    -- where makeArticle s = ""
+
+-- Parse the request body into the User
+getUserParam :: ActionT TL.Text IO (Maybe User)
+getUserParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe User)

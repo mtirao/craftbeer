@@ -25,6 +25,12 @@ viewArticle (Just article) = json article
 createdArticle :: Maybe Article -> ActionM ()
 createdArticle article = json ()
 
+createdUser :: Maybe User -> ActionM ()
+createdUser user = case user of
+                        Just u -> json u
+                        Nothing -> json (ErrorMessage "Something unexpected")
+
+
 updatedArticle :: Maybe Article -> ActionM ()
 updatedArticle article = json ()
 
