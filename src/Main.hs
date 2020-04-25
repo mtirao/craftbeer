@@ -1,7 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
@@ -10,7 +7,7 @@ import Views
 import Auth
 import Domain
 
-import Web.Scotty as WS
+import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
 import Network.Wai
 import Network.Wai.Middleware.Static
@@ -22,13 +19,8 @@ import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
 import Data.Pool(Pool, createPool, withResource)
 import qualified Data.Text.Lazy as TL
-import Data.Aeson 
+import Data.Aeson
 import Database.PostgreSQL.Simple
-
-import Network.Wreq as NW hiding (basicAuth)
-import Control.Lens
-
-
 
 -- Parse file "application.conf" and get the DB connection info
 makeDbConfig :: C.Config -> IO (Maybe Db.DbConfig)
@@ -49,15 +41,6 @@ protectedResources request = do
     where protect (p : _) =  p == "admin"  -- all requests to /admin/* should be authenticated
           protect _       =  False         -- other requests are allowed for anonymous users
 
-opts = defaults & NW.header "SOAPAction" .~ ["application/json"]
-
-instance ToJSON Login where
-    toJSON Login {..} = object
-        [
-            "username" Data.Aeson..= username,
-            "password" Data.Aeson..= password
-        ]
-
 
 main :: IO ()
 main = do
@@ -68,23 +51,40 @@ main = do
       Nothing -> putStrLn "No database configuration found, terminating..."
       Just conf -> do      
           pool <- createPool (newConn conf) close 1 40 10
-          scotty 4000 $ do
+          scotty 3000 $ do
               middleware $ staticPolicy (noDots >-> addBase "static") -- serve static files
               middleware $ logStdout                                  -- log all requests; for production use logStdout
               middleware $ basicAuth (verifyCredentials pool)         -- check if the user is authenticated for protected resources
                            "Haskell Blog Realm" { authIsProtected = protectedResources } -- function which restricts access to some routes only for authenticated users
 
-              WS.get "/" do r <- liftIO $ NW.post "http://localhost:3000/accounts/login" (toJSON login)
-                            raw (r ^. responseBody)
-                                       
- 
-              -- UPDATE
-              WS.put    "/admin/articles"  do  article <- getArticleParam -- read the request body, try to parse it into article
-                                               updateArticle pool article -- update parsed article in the DB
-                                               updatedArticle article     -- show info that the article was updated
-
-            
+              -- AUTH
+              post   "/accounts/login" $ do article <- getArticleParam -- read the request body, try to parse it into article
+                                            insertArticle pool article -- insert the parsed article into the DB
+                                            createdArticle article     -- show info that the article was created
               
+              -- LIST
+              get    "/articles" $ do articles <- liftIO $ listArticles pool  -- get the ist of articles for DB
+                                      articlesList articles                   -- show articles list
+
+              -- VIEW
+              get    "/articles/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id from the request
+                                          maybeArticle <- liftIO $ findArticle pool id -- get the article from the DB
+                                          viewArticle maybeArticle            -- show the article if it was found
+
+              -- CREATE
+              post   "/admin/articles" $ do article <- getArticleParam -- read the request body, try to parse it into article
+                                            insertArticle pool article -- insert the parsed article into the DB
+                                            createdArticle article     -- show info that the article was created
+
+              -- UPDATE
+              put    "/admin/articles" $ do article <- getArticleParam -- read the request body, try to parse it into article
+                                            updateArticle pool article -- update parsed article in the DB
+                                            updatedArticle article     -- show info that the article was updated
+
+              -- DELETE
+              delete "/admin/articles/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id
+                                                deleteArticle pool id  -- delete the article from the DB
+                                                deletedArticle id      -- show info that the article was deleted
 
 -----------------------------------------------
 
@@ -93,3 +93,10 @@ getArticleParam :: ActionT TL.Text IO (Maybe Article)
 getArticleParam = do b <- body
                      return $ (decode b :: Maybe Article)
                      where makeArticle s = ""
+
+-- Parse the request body into the Article
+getLoginParam :: ActionT TL.Text IO (Maybe Login)
+getLoginParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Login)
+                    -- where makeArticle s = ""

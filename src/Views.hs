@@ -13,28 +13,20 @@ import qualified Data.Text.Lazy.Encoding as TL
 import Control.Monad.IO.Class
 import Web.Scotty.Internal.Types
 
-import Network.Wreq as NW
-import Control.Lens
-import Data.Aeson.Lens
-
-
-data Login = Login 
-    { username :: Text
-      , password :: Text
-    }
-
-login = Login "fnisi@wannaplay.club" "3177AppL"
 
 
 articlesList :: [Article] -> ActionM ()
-articlesList articles = WS.json articles
+articlesList articles = json articles
 
+viewArticle :: Maybe Article -> ActionM ()
+viewArticle Nothing = json ()
+viewArticle (Just article) = json article
 
 createdArticle :: Maybe Article -> ActionM ()
-createdArticle article = WS.json ()
+createdArticle article = json ()
 
 updatedArticle :: Maybe Article -> ActionM ()
-updatedArticle article = WS.json ()
+updatedArticle article = json ()
 
 deletedArticle :: TL.Text -> ActionM ()
-deletedArticle id = WS.json ()
+deletedArticle id = json ()
