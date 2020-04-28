@@ -17,11 +17,10 @@ import GHC.Int
 
 -- DbConfig contains info needed to connect to MySQL server
 data DbConfig = DbConfig {
-     dbName :: String,
-     dbUser :: String,
-     dbPassword :: String
-     }
-     deriving (Show, Generic)
+        dbName :: String,
+        dbUser :: String,
+        dbPassword :: String
+    } deriving (Show, Generic)
 
 -- The function knows how to create new DB connection
 -- It is needed to use with resource pool
@@ -101,14 +100,6 @@ insertArticle pool (Just (Article id title bodyText)) = do
                             "INSERT INTO article(title, bodyText) VALUES(?,?)"
      return ()
 
-insertUser :: Pool Connection -> Maybe User -> ActionT TL.Text IO ()
-insertUser pool Nothing = return ()
-insertUser pool (Just (User password user name lastname role)) = do
-     liftIO $ execSqlT pool [role, password, user, name, lastname]
-                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
-     return ()
-
-
 updateArticle :: Pool Connection -> Maybe Article -> ActionT TL.Text IO ()
 updateArticle pool Nothing = return ()
 updateArticle pool (Just (Article id title bodyText)) = do
@@ -120,3 +111,46 @@ deleteArticle :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
 deleteArticle pool id = do
      liftIO $ execSqlT pool [id] "DELETE FROM article WHERE id=?"
      return ()
+
+
+--------------------------------------------------------------------------------
+class DbOperation a where 
+    insert :: Pool Connection -> Maybe a -> ActionT TL.Text IO ()
+
+
+instance DbOperation User where
+    insert pool Nothing = return ()
+    insert pool (Just (User password user name lastname role)) = do
+        liftIO $ execSqlT pool [role, password, user, name, lastname]
+                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
+        return () 
+
+instance DbOperation Stage where
+    insert pool Nothing = return ()
+    insert pool (Just (Stage id recipe_type temp time)) = do
+        liftIO $ execSqlT pool [role, password, user, name, lastname]
+                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
+        return () 
+
+instance DbOperation Sensor where
+    insert pool Nothing = return ()
+    insert pool (Just (Sensor sensortype name file)) = do
+        liftIO $ execSqlT pool [sensortype, name, file]
+                            "INSERT INTO sensors(type, name, file) VALUES(?,?,?)"
+        return () 
+
+instance DbOperation Recipe where
+    insert pool Nothing = return ()
+    insert pool (Just (Recipe style name ibu abv color)) = do
+        liftIO $ execSqlT pool [style, name, ibu, abv, color]
+                            "INSERT INTO recipes(style, name, ibu, abv, color) VALUES(?,?,?,?,?)"
+        return () 
+
+instance DbOperation Agent where
+    insert pool Nothing = return ()
+    insert pool (Just (Agent type ip)) = do
+        liftIO $ execSqlT pool [type, ip]
+                            "INSERT INTO agents(type, ip, type, unit) VALUES(?,?)"
+        return () 
+
+--------------------------------------------------------------------------------

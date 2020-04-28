@@ -51,52 +51,79 @@ main = do
       Just conf -> do      
           pool <- createPool (newConn conf) close 1 40 10
           scotty 3000 $ do
-              middleware $ staticPolicy (noDots >-> addBase "static") -- serve static files
-              middleware $ logStdout                                  -- log all requests; for production use logStdout
+                middleware $ staticPolicy (noDots >-> addBase "static") -- serve static files
+                middleware $ logStdout                                  -- log all requests; for production use logStdout
              
 
-              -- AUTH
-              post   "/accounts/login" $ do article <- getArticleParam -- read the request body, try to parse it into article
+                -- AUTH
+                post   "/accounts/login" $ do 
+                                            article <- getArticleParam -- read the request body, try to parse it into article
                                             insertArticle pool article -- insert the parsed article into the DB
                                             createdArticle article     -- show info that the article was created
 
-              post "/accounts/signup" $ do  user <- getUserParam
-                                            insertUser pool user
-                                            createdUser user
+                post "/accounts/signup" $ do 
+                                            user <- getUserParam
+                                            insert pool user
+                                            response user
 
+                -- STAGES
+                post "/craftbeer/stage" $ do
+                                            stage <- getStageParam
+                                            insert pool stage
+                                            response stage
+                                            
+
+
+                -- SENSORS
+                post "/craftbeer/sensor" $ do
+                                            sensor <- getSensorParam
+                                            insert pool sensor
+                                            response sensor
+
+                -- RECIPES
+
+                -- INGREDIENTS
+
+                -- AGENTS
 
 
               
-              -- LIST
-              get    "/articles" $ do articles <- liftIO $ listArticles pool  -- get the ist of articles for DB
-                                      articlesList articles                   -- show articles list
+                -- LIST
+                get    "/articles" $ do 
+                                        articles <- liftIO $ listArticles pool  -- get the ist of articles for DB
+                                        articlesList articles                   -- show articles list
 
-              -- VIEW
-              get    "/articles/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id from the request
-                                          maybeArticle <- liftIO $ findArticle pool id -- get the article from the DB
-                                          viewArticle maybeArticle            -- show the article if it was found
+                -- VIEW
+                get    "/articles/:id" $ do 
+                                            id <- param "id" :: ActionM TL.Text -- get the article id from the request
+                                            maybeArticle <- liftIO $ findArticle pool id -- get the article from the DB
+                                            viewArticle maybeArticle            -- show the article if it was found
 
-              -- CREATE
-              post   "/admin/articles" $ do article <- getArticleParam -- read the request body, try to parse it into article
-                                            insertArticle pool article -- insert the parsed article into the DB
-                                            createdArticle article     -- show info that the article was created
+                -- CREATE
+                post   "/admin/articles" $ do 
+                                                article <- getArticleParam -- read the request body, try to parse it into article
+                                                insertArticle pool article -- insert the parsed article into the DB
+                                                createdArticle article     -- show info that the article was created
 
-              -- UPDATE
-              put    "/admin/articles" $ do article <- getArticleParam -- read the request body, try to parse it into article
-                                            updateArticle pool article -- update parsed article in the DB
-                                            updatedArticle article     -- show info that the article was updated
+                -- UPDATE
+                put    "/admin/articles" $ do 
+                                                article <- getArticleParam -- read the request body, try to parse it into article
+                                                updateArticle pool article -- update parsed article in the DB
+                                                updatedArticle article     -- show info that the article was updated
 
-              -- DELETE
-              delete "/admin/articles/:id" $ do id <- param "id" :: ActionM TL.Text -- get the article id
-                                                deleteArticle pool id  -- delete the article from the DB
-                                                deletedArticle id      -- show info that the article was deleted
+                -- DELETE
+                delete "/admin/articles/:id" $ do 
+                                                    id <- param "id" :: ActionM TL.Text -- get the article id
+                                                    deleteArticle pool id  -- delete the article from the DB
+                                                    deletedArticle id      -- show info that the article was deleted
 
 -----------------------------------------------
 
 -- Parse the request body into the Article
 getArticleParam :: ActionT TL.Text IO (Maybe Article)
-getArticleParam = do b <- body
-                     return $ (decode b :: Maybe Article)
+getArticleParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Article)
 
 -- Parse the request body into the Login
 getLoginParam :: ActionT TL.Text IO (Maybe Login)
@@ -109,3 +136,15 @@ getUserParam :: ActionT TL.Text IO (Maybe User)
 getUserParam = do 
                     b <- body
                     return $ (decode b :: Maybe User)
+
+-- Parse the request body into the Stages
+getStageParam :: ActionT TL.Text IO (Maybe Stage)
+getStageParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Stage)
+
+-- Parse the request body into the Sensor
+getSensorParam :: ActionT TL.Text IO (Maybe Sensor)
+getSensorParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Sensor)

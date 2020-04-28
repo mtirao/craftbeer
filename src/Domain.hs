@@ -87,7 +87,7 @@ instance ToJSON Stage where
 
 instance FromJSON Stage where
     parseJSON (Object v) = Stage <$>
-        v .: "recipeid" <*>
+        v .: "recipeid" .!= 0 <*>
         v .: "type" <*>
         v .: "temp" <*>
         v .: "time"
@@ -97,12 +97,13 @@ data Sensor = Sensor Text Text Text
     deriving (Show)
 
 instance ToJSON Sensor where
-    toJSON (Sensor sensortype, name, file)
+    toJSON (Sensor sensortype name file) = object
         [
             "type" .= sensortype,
             "name" .= name,
             "file" .= file
         ]
+
 
 instance FromJSON Sensor where
     parseJSON (Object v) = Sensor <$>
@@ -115,7 +116,7 @@ data Recipe = Recipe Text Text Integer Integer Integer
     deriving (Show)
 
 instance ToJSON Recipe where
-    toJSON (Recipe style name ibu abv color)
+    toJSON (Recipe style name ibu abv color) = object
         [
             "style" .= style,
             "name" .= name,
@@ -132,7 +133,45 @@ instance FromJSON Recipe where
         v .: "abv" <*>
         v .: "color"
 
--- Jus for testing                 
+-- Ingredient
+data Ingredient = Ingredient Integer Text Text Integer
+    deriving (Show)
+
+instance ToJSON Ingredient where
+    toJSON (Ingredient ingredientrecipe ingredientname ingredienttype unit) = object
+        [
+            "recipe" .= ingredientrecipe,
+            "name" .= ingredientname,
+            "type" .= ingredienttype,
+            "unit" .= unit
+        ]
+
+instance FromJSON Ingredient where
+    parseJSON (Object v) = Ingredient <$>
+        v .: "recipe" <*>
+        v .: "name" <*>
+        v .: "type" <*>
+        v .: "unit"
+
+-- Agents
+data Agent = Agent Text Text
+    deriving (Show)
+
+instance ToJSON Agent where
+    toJSON (Agent agenttype ip) = object
+        [
+            "type" .= agenttype,
+            "ip" .= ip
+        ]
+
+instance FromJSON Agent where
+    parseJSON (Object v) = Agent <$>
+        v .: "type" <*>
+        v .: "ip"
+
+ 
+
+-- Just for testing                 
 login = Login "fnisi@wannaplay.club" "3177AppL"
 
 
