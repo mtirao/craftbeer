@@ -127,9 +127,9 @@ instance DbOperation User where
 
 instance DbOperation Stage where
     insert pool Nothing = return ()
-    insert pool (Just (Stage id recipe_type temp time)) = do
-        liftIO $ execSqlT pool [role, password, user, name, lastname]
-                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
+    insert pool (Just (Stage recipeid recipe_type temp time)) = do
+        liftIO $ execSqlT pool [recipeid, recipe_type, temp, time]
+                            "INSERT INTO recipe(recipeid, type, temp, time) VALUES(?,?,?,?)"
         return () 
 
 instance DbOperation Sensor where
@@ -142,15 +142,24 @@ instance DbOperation Sensor where
 instance DbOperation Recipe where
     insert pool Nothing = return ()
     insert pool (Just (Recipe style name ibu abv color)) = do
-        liftIO $ execSqlT pool [style, name, ibu, abv, color]
+        liftIO $ execSqlT pool [style, name, (TL.decodeUtf8 $ BL.pack $ show ibu), (TL.decodeUtf8 $ BL.pack $ show abv), (TL.decodeUtf8 $ BL.pack $ show color)]
                             "INSERT INTO recipes(style, name, ibu, abv, color) VALUES(?,?,?,?,?)"
+        return () 
+
+instance DbOperation Ingredient where
+    insert pool Nothing = return ()
+    insert pool (Just (Ingredient recipe name ingredienttype unit)) = do
+        liftIO $ execSqlT pool [(TL.decodeUtf8 $ BL.pack $ show recipe), name, ingredienttype, (TL.decodeUtf8 $ BL.pack $ show unit)]
+                            "INSERT INTO ingredient(recipe, name, type, unit) VALUES(?,?,?,?)"
         return () 
 
 instance DbOperation Agent where
     insert pool Nothing = return ()
-    insert pool (Just (Agent type ip)) = do
-        liftIO $ execSqlT pool [type, ip]
+    insert pool (Just (Agent agenttype ip)) = do
+        liftIO $ execSqlT pool [agenttype, ip]
                             "INSERT INTO agents(type, ip, type, unit) VALUES(?,?)"
         return () 
+
+
 
 --------------------------------------------------------------------------------

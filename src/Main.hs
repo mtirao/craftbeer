@@ -81,11 +81,22 @@ main = do
                                             response sensor
 
                 -- RECIPES
+                post "/craftbeer/recipe" $ do
+                                            recipe <- getRecipeParam
+                                            insert pool recipe
+                                            response recipe
 
                 -- INGREDIENTS
+                post "/craftbeer/ingredient" $ do
+                                                ingredient <- getIngredientParam
+                                                insert pool ingredient
+                                                response ingredient
 
                 -- AGENTS
-
+                post "/craftbeer/agent" $ do
+                                            agent <- getAgentParam
+                                            insert pool agent
+                                            response agent
 
               
                 -- LIST
@@ -148,3 +159,23 @@ getSensorParam :: ActionT TL.Text IO (Maybe Sensor)
 getSensorParam = do 
                     b <- body
                     return $ (decode b :: Maybe Sensor)
+
+-- Parse the request body into the Recipe
+getRecipeParam :: ActionT TL.Text IO (Maybe Recipe)
+getRecipeParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Recipe)
+
+-- Parse the request body into the Ingredient
+getIngredientParam :: ActionT TL.Text IO (Maybe Ingredient)
+getIngredientParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Ingredient)
+
+-- Parse the request body into the Agent
+getAgentParam :: ActionT TL.Text IO (Maybe Agent)
+getAgentParam = do 
+                    b <- body
+                    return $ (decode b :: Maybe Agent)
+
+                    
