@@ -57,7 +57,7 @@ data User = User Text Text Text  Text Text -- password user name lastname role
 instance ToJSON User where
     toJSON (User password user name lastname role) = object
         [
-            "user" .= user,
+            "username" .= user,
             "password" .= password,
             "name" .= name,
             "lastname" .= lastname,
@@ -66,7 +66,7 @@ instance ToJSON User where
 
 instance FromJSON User where
     parseJSON (Object v) = User <$>
-        v .:  "user" <*>
+        v .:  "username" <*>
         v .:  "password" <*>
         v .:  "name" <*>
         v .:  "lastname" <*>
@@ -170,10 +170,13 @@ instance FromJSON Agent where
         v .: "ip"
 
  
+-- Getters
+username :: Maybe Login -> Text
+username a = case a of
+                Nothing -> ""
+                Just (Login u p) -> u   
 
--- Just for testing                 
-login = Login "fnisi@wannaplay.club" "3177AppL"
-
-
- --WS.get "/" do r <- liftIO $ NW.post "http://localhost:3000/accounts/login" (toJSON login)
-             --               raw (r ^. responseBody)
+password :: Maybe Login -> Text
+password a = case a of
+                Nothing -> ""
+                Just (Login u p) -> p

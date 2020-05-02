@@ -14,12 +14,14 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 import Network.Wai.Middleware.HttpAuth
 import Control.Applicative
 import Control.Monad.IO.Class
+import qualified Data.ByteString.Char8 as BC
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
 import Data.Pool(Pool, createPool, withResource)
 import qualified Data.Text.Lazy as TL
 import Data.Aeson
 import Database.PostgreSQL.Simple
+
 
 -- Parse file "application.conf" and get the DB connection info
 makeDbConfig :: C.Config -> IO (Maybe Db.DbConfig)
@@ -57,44 +59,55 @@ main = do
 
                 -- AUTH
                 post   "/accounts/login" $ do 
-                                            article <- getArticleParam -- read the request body, try to parse it into article
-                                            insertArticle pool article -- insert the parsed article into the DB
-                                            createdArticle article     -- show info that the article was created
+                                            b <- body
+                                            login <- return $ (decode b :: Maybe Login)
+                                            result <- liftIO $ findUserByLogin pool (TL.unpack (username login))
+                                            case result of 
+                                                Nothing -> errorMessage (ErrorMessage "User not nothing")
+                                                Just a ->  if (TL.pack a) == (password login) 
+                                                            then errorMessage (ErrorMessage "Ok") 
+                                                            else errorMessage (ErrorMessage "Wrong password") 
+                                             
 
                 post "/accounts/signup" $ do 
-                                            user <- getUserParam
+                                            b <- body
+                                            user <- return $ (decode b :: Maybe User)
                                             insert pool user
                                             response user
 
                 -- STAGES
                 post "/craftbeer/stage" $ do
-                                            stage <- getStageParam
+                                            b <- body
+                                            stage <- return $ (decode b :: Maybe Stage)
                                             insert pool stage
                                             response stage
                                             
 
-
                 -- SENSORS
                 post "/craftbeer/sensor" $ do
-                                            sensor <- getSensorParam
+                                            b <- body
+                                            sensor <- return $ (decode b :: Maybe Sensor)
                                             insert pool sensor
                                             response sensor
 
                 -- RECIPES
                 post "/craftbeer/recipe" $ do
-                                            recipe <- getRecipeParam
+                                            b <- body
+                                            recipe <- return $ (decode b :: Maybe Recipe)
                                             insert pool recipe
                                             response recipe
 
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ do
-                                                ingredient <- getIngredientParam
+                                                b <- body
+                                                ingredient <- return $ (decode b :: Maybe Ingredient)
                                                 insert pool ingredient
                                                 response ingredient
 
                 -- AGENTS
                 post "/craftbeer/agent" $ do
-                                            agent <- getAgentParam
+                                            b <- body
+                                            agent <- return $ (decode b :: Maybe Agent)
                                             insert pool agent
                                             response agent
 
@@ -106,8 +119,8 @@ main = do
 
                 -- VIEW
                 get    "/articles/:id" $ do 
-                                            id <- param "id" :: ActionM TL.Text -- get the article id from the request
-                                            maybeArticle <- liftIO $ findArticle pool id -- get the article from the DB
+                                            idd <- param "id" :: ActionM TL.Text -- get the article id from the request
+                                            maybeArticle <- liftIO $ findArticle pool idd -- get the article from the DB
                                             viewArticle maybeArticle            -- show the article if it was found
 
                 -- CREATE
@@ -124,9 +137,9 @@ main = do
 
                 -- DELETE
                 delete "/admin/articles/:id" $ do 
-                                                    id <- param "id" :: ActionM TL.Text -- get the article id
-                                                    deleteArticle pool id  -- delete the article from the DB
-                                                    deletedArticle id      -- show info that the article was deleted
+                                                    idd <- param "id" :: ActionM TL.Text -- get the article id
+                                                    deleteArticle pool idd  -- delete the article from the DB
+                                                    deletedArticle idd      -- show info that the article was deleted
 
 -----------------------------------------------
 
@@ -142,40 +155,4 @@ getLoginParam = do
                     b <- body
                     return $ (decode b :: Maybe Login)
 
--- Parse the request body into the User
-getUserParam :: ActionT TL.Text IO (Maybe User)
-getUserParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe User)
-
--- Parse the request body into the Stages
-getStageParam :: ActionT TL.Text IO (Maybe Stage)
-getStageParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Stage)
-
--- Parse the request body into the Sensor
-getSensorParam :: ActionT TL.Text IO (Maybe Sensor)
-getSensorParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Sensor)
-
--- Parse the request body into the Recipe
-getRecipeParam :: ActionT TL.Text IO (Maybe Recipe)
-getRecipeParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Recipe)
-
--- Parse the request body into the Ingredient
-getIngredientParam :: ActionT TL.Text IO (Maybe Ingredient)
-getIngredientParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Ingredient)
-
--- Parse the request body into the Agent
-getAgentParam :: ActionT TL.Text IO (Maybe Agent)
-getAgentParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Agent)
-
-                    
+              

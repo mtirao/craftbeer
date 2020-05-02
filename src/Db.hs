@@ -73,9 +73,9 @@ execSqlT pool args sql = withResource pool ins
 
 findUserByLogin :: Pool Connection -> String -> IO (Maybe String)
 findUserByLogin pool login = do
-         res <- liftIO $ fetch pool (Only login) "SELECT * FROM users WHERE login=?" :: IO [(Integer, String, String, String, String)]
+         res <- liftIO $ fetch pool (Only login) "SELECT role, password, username, name, lastname FROM users WHERE username=?" :: IO [(String, String, String, String, String)]
          return $ password res
-         where password [(_, _, pwd, _, _)] = Just pwd
+         where password [(_, pwd, _, _, _)] = Just pwd
                password _ = Nothing
 
 --------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ class DbOperation a where
 
 instance DbOperation User where
     insert pool Nothing = return ()
-    insert pool (Just (User password user name lastname role)) = do
+    insert pool (Just (User user password name lastname role)) = do
         liftIO $ execSqlT pool [role, password, user, name, lastname]
                             "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
         return () 
