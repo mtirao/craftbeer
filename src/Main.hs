@@ -25,10 +25,10 @@ import Network.HTTP.Types.Status
 -- Parse file "application.conf" and get the DB connection info
 makeDbConfig :: C.Config -> IO (Maybe Db.DbConfig)
 makeDbConfig conf = do
-  name <- C.lookup conf "database.name" :: IO (Maybe String)
-  user <- C.lookup conf "database.user" :: IO (Maybe String)
-  dbConfPassword <- C.lookup conf "database.password" :: IO (Maybe String)
-  return $ DbConfig <$> name
+    name <- C.lookup conf "database.name" :: IO (Maybe String)
+    user <- C.lookup conf "database.user" :: IO (Maybe String)
+    dbConfPassword <- C.lookup conf "database.password" :: IO (Maybe String)
+    return $ DbConfig <$> name
                     <*> user
                     <*> dbConfPassword
 
@@ -38,10 +38,10 @@ main = do
     dbConf <- makeDbConfig loadedConf
     
     case dbConf of
-      Nothing -> putStrLn "No database configuration found, terminating..."
-      Just conf -> do      
-          pool <- createPool (newConn conf) close 1 40 10
-          scotty 3000 $ do
+        Nothing -> putStrLn "No database configuration found, terminating..."
+        Just conf -> do      
+            pool <- createPool (newConn conf) close 1 40 10
+            scotty 3000 $ do
                 middleware $ staticPolicy (noDots >-> addBase "static") -- serve static files
                 middleware $ logStdout                                  -- log all requests; for production use logStdout
              
