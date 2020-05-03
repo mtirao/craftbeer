@@ -8,18 +8,21 @@ import Domain
 
 import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
-import Network.Wai()
+
 import Network.Wai.Middleware.Static
 import Network.Wai.Middleware.RequestLogger (logStdout)
-import Control.Applicative()
+import Network.HTTP.Types.Status
+
 import Control.Monad.IO.Class
+
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
-import Data.Pool(createPool)
 import qualified Data.Text.Lazy as TL
+import Data.Pool(createPool)
 import Data.Aeson
+
 import Database.PostgreSQL.Simple
-import Network.HTTP.Types.Status
+
 
 
 -- Parse file "application.conf" and get the DB connection info
