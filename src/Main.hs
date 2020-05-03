@@ -21,6 +21,7 @@ import Data.Pool(Pool, createPool, withResource)
 import qualified Data.Text.Lazy as TL
 import Data.Aeson
 import Database.PostgreSQL.Simple
+import Network.HTTP.Types.Status
 
 
 -- Parse file "application.conf" and get the DB connection info
@@ -63,11 +64,16 @@ main = do
                                             login <- return $ (decode b :: Maybe Login)
                                             result <- liftIO $ findUserByLogin pool (TL.unpack (username login))
                                             case result of 
-                                                Nothing -> errorMessage (ErrorMessage "User not nothing")
-                                                Just a ->  if (TL.pack a) == (password login) 
-                                                            then errorMessage (ErrorMessage "Ok") 
-                                                            else errorMessage (ErrorMessage "Wrong password") 
-                                             
+                                                Nothing -> do 
+                                                            jsonResponse (ErrorMessage "User not nothing")
+                                                            status badRequest400
+                                                Just (User pwd usrname name lastname role) -> 
+                                                            if pwd == (password login) 
+                                                            then jsonResponse (UserResponse name lastname role) 
+                                                                 
+                                                            else do 
+                                                                    jsonResponse (ErrorMessage "Wrong password") 
+                                                                    status badRequest400
 
                 post "/accounts/signup" $ do 
                                             b <- body

@@ -14,11 +14,11 @@ import Data.Hash.MD5
 
 -- Encodes provided password with md5 and then compares it with the hash
 -- stored in the DB
-verifyCredentials :: Pool Connection -> B.ByteString -> B.ByteString -> IO Bool
+{-- verifyCredentials :: Pool Connection -> B.ByteString -> B.ByteString -> IO Bool
 verifyCredentials pool user password = do
    pwd <- findUserByLogin pool (BC.unpack user)
    return $ comparePasswords pwd (BC.unpack password)
    where comparePasswords Nothing _ = False
-         comparePasswords (Just p) password =  p == (md5s $ Str password)
+         comparePasswords (Just p) password =  p == (md5s $ Str password) --}
 
 

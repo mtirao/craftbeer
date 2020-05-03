@@ -23,16 +23,8 @@ instance ToJSON Article where
                  "title" .= title,
                  "bodyText" .= bodyText]
 
--- Request/Response Json
+-- Request Json
 -- Error
-data ErrorMessage = ErrorMessage Text
-    deriving (Show)
-
-instance ToJSON ErrorMessage where
-    toJSON (ErrorMessage message) = object
-        [
-            "error" .= message
-        ]
 
 -- Login
 data Login = Login Text Text -- username password
@@ -169,7 +161,29 @@ instance FromJSON Agent where
         v .: "type" <*>
         v .: "ip"
 
- 
+-- Response JSON
+--ErrorMessage
+data ErrorMessage = ErrorMessage Text
+    deriving (Show)
+
+instance ToJSON ErrorMessage where
+    toJSON (ErrorMessage message) = object
+        [
+            "error" .= message
+        ]
+
+--UserResponse
+data UserResponse = UserResponse Text Text Text
+     deriving (Show)
+
+instance ToJSON UserResponse where 
+    toJSON (UserResponse name lastname role) = object
+        [
+            "name" .= name,
+            "lastname" .= lastname,
+            "role" .= role
+        ]
+
 -- Getters
 username :: Maybe Login -> Text
 username a = case a of

@@ -49,8 +49,9 @@ instance Response Agent where
                         Just u -> WS.json u
                         Nothing -> WS.json (ErrorMessage "Something unexpected")
 
-errorMessage :: ToJSON a => a -> ActionM ()
-errorMessage e = WS.json e
+
+jsonResponse :: ToJSON a => a -> ActionM ()
+jsonResponse e = WS.json e
 
 --------------------------------------------------------------------------------
 articlesList :: [Article] -> ActionM ()

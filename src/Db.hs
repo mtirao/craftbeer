@@ -71,12 +71,12 @@ execSqlT pool args sql = withResource pool ins
 
 --------------------------------------------------------------------------------
 
-findUserByLogin :: Pool Connection -> String -> IO (Maybe String)
+findUserByLogin :: Pool Connection -> String -> IO (Maybe User)
 findUserByLogin pool login = do
          res <- liftIO $ fetch pool (Only login) "SELECT role, password, username, name, lastname FROM users WHERE username=?" :: IO [(String, String, String, String, String)]
-         return $ password res
-         where password [(_, pwd, _, _, _)] = Just pwd
-               password _ = Nothing
+         return $ userResponse res
+         where userResponse [(role, pwd, usrname, name, lastname)] = Just (User (TL.pack pwd) (TL.pack usrname) (TL.pack name) (TL.pack lastname) (TL.pack role))
+               userResponse _ = Nothing
 
 --------------------------------------------------------------------------------
 
