@@ -8,16 +8,14 @@ import Domain
 
 import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
-import Network.Wai
+import Network.Wai()
 import Network.Wai.Middleware.Static
-import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
-import Network.Wai.Middleware.HttpAuth
-import Control.Applicative
+import Network.Wai.Middleware.RequestLogger (logStdout)
+import Control.Applicative()
 import Control.Monad.IO.Class
-import qualified Data.ByteString.Char8 as BC
 import qualified Data.Configurator as C
 import qualified Data.Configurator.Types as C
-import Data.Pool(Pool, createPool, withResource)
+import Data.Pool(createPool)
 import qualified Data.Text.Lazy as TL
 import Data.Aeson
 import Database.PostgreSQL.Simple
@@ -29,20 +27,10 @@ makeDbConfig :: C.Config -> IO (Maybe Db.DbConfig)
 makeDbConfig conf = do
   name <- C.lookup conf "database.name" :: IO (Maybe String)
   user <- C.lookup conf "database.user" :: IO (Maybe String)
-  password <- C.lookup conf "database.password" :: IO (Maybe String)
+  dbConfPassword <- C.lookup conf "database.password" :: IO (Maybe String)
   return $ DbConfig <$> name
                     <*> user
-                    <*> password
-
--- The function knows which resources are available only for the
--- authenticated users
-protectedResources ::  Request -> IO Bool
-protectedResources request = do
-    let path = pathInfo request
-    return $ protect path
-    where protect (p : _) =  p == "admin"  -- all requests to /admin/* should be authenticated
-          protect _       =  False         -- other requests are allowed for anonymous users
-
+                    <*> dbConfPassword
 
 main :: IO ()
 main = do
@@ -67,7 +55,7 @@ main = do
                                                 Nothing -> do 
                                                             jsonResponse (ErrorMessage "User not nothing")
                                                             status badRequest400
-                                                Just (User pwd usrname name lastname role) -> 
+                                                Just (User pwd _ name lastname role) -> 
                                                             if pwd == (password login) 
                                                             then jsonResponse (UserResponse name lastname role) 
                                                                  
