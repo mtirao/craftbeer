@@ -44,3 +44,7 @@ createRecipe pool body  = do
                                                                                 where dbRecipeResponse = do
                                                                                                         jsonResponse a
                                                                                                         status status201  
+
+listRecipes pool =  do
+                        recipes <- liftIO $ findRecipes pool  -- get the ist of articles for DB
+                        jsonResponse recipes 

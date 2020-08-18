@@ -114,12 +114,21 @@ main = do
 
                 -- RECIPES
                 post "/craftbeer/recipe" $ createRecipe pool body
-
                 delete "/craftbeer/recipe/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteRecipe pool idd
                                                     status status204
+                                                    
+                get "/craftbeer/recipe/:id" $ do   
+                                                idd <- param "id" :: ActionM TL.Text
+                                                maybeRecipe <- liftIO $ findRecipe pool idd
+                                                case maybeRecipe of
+                                                    Nothing -> status status400
+                                                    Just a -> jsonResponse a 
 
+                get "/craftbeer/recipes" $ listRecipes pool                                      
+                                                                                        
+                                                
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ createIngredient pool body 
 

@@ -34,7 +34,19 @@ instance DbOperation Recipe where
             where oneRecipe ((id, style, name, ibu, abv, color) : _) = Just $ Recipe id style name ibu abv color
                   oneRecipe _ = Nothing
 
-
+deleteRecipe :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
 deleteRecipe pool id = do 
     _ <- liftIO $ execSqlT pool [id] "DELETE FROM recipes WHERE id=?"
     return ()
+
+findRecipe :: Pool Connection -> TL.Text -> IO (Maybe Recipe)
+findRecipe pool id = do 
+                        res <- fetch pool (Only id) "SELECT id, style, name, ibu, abv, color FROM recipes WHERE id=?" :: IO [(Maybe Integer, TL.Text, TL.Text, Integer, Integer, Integer )]
+                        return $ oneRecipe res
+                        where oneRecipe ((id, style, name, ibu, abv, color) : _) = Just $ Recipe id style name ibu abv color
+                              oneRecipe _ = Nothing
+
+findRecipes :: Pool Connection -> IO [Recipe]
+findRecipes pool = do
+                        res <- fetchSimple pool "SELECT id, style, name, ibu, abv, color FROM recipes" :: IO [(Maybe Integer, TL.Text, TL.Text, Integer, Integer, Integer )]
+                        return $ map (\(id, style, name, ibu, abv, color) -> Recipe id style name ibu abv color) res

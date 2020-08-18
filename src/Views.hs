@@ -14,44 +14,11 @@ import Control.Monad.IO.Class()
 import Web.Scotty.Internal.Types()
 
 
--- Class Response
-class Response a where
-    response :: Maybe a -> ActionM ()
-
--- Response Instances
-instance Response User where
-    response user = case user of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
-
-instance Response Stage where
-    response stage = case stage of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
-
-instance Response Sensor where
-    response sensor = case sensor of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
-
-instance Response Recipe where
-    response recipes = case recipes of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
-
-instance Response Ingredient where
-    response ingredient = case ingredient of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
-
-instance Response Agent where
-    response agent = case agent of
-                        Just u -> WS.json u
-                        Nothing -> WS.json (ErrorMessage "Something unexpected")
 
 
 jsonResponse :: ToJSON a => a -> ActionM ()
 jsonResponse e = WS.json e
+
 
 --------------------------------------------------------------------------------
 articlesList :: [Article] -> ActionM ()
