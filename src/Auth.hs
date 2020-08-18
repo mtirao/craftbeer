@@ -3,14 +3,14 @@
 
 module Auth where
 
-import Db
+import Db.Db
 
-import Data.String
-import qualified Data.ByteString.Char8 as BC
-import qualified Data.ByteString as B
-import Data.Pool(Pool, createPool, withResource)
-import Database.PostgreSQL.Simple
-import Data.Hash.MD5
+--import Data.String
+--import qualified Data.ByteString.Char8 as BC
+--import qualified Data.ByteString as B
+--import Data.Pool(Pool, createPool, withResource)
+--import Database.PostgreSQL.Simple
+--import Data.Hash.MD5
 
 -- Encodes provided password with md5 and then compares it with the hash
 -- stored in the DB

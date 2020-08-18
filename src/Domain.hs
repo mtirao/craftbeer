@@ -1,4 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TemplateHaskell       #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE RecordWildCards       #-}
+
 
 module Domain where
 
@@ -6,7 +13,7 @@ import Data.Text.Lazy
 import Data.Text.Lazy.Encoding
 import Data.Aeson
 import Control.Applicative
-
+import GHC.Generics
 
 data Article = Article Integer Text Text -- id title bodyText
      deriving (Show)
@@ -65,103 +72,82 @@ instance FromJSON User where
         v .:  "role"
 
 -- Stages
-data Stage = Stage Integer Integer Integer Integer
-    deriving (Show)
+data Stage = Stage{
+    stageId:: Maybe Integer
+    ,belong_to :: Integer
+    ,stage_type :: Integer
+    ,temp :: Integer
+    ,time :: Integer
+} deriving (Show, Generic)
 
-instance ToJSON Stage where
-    toJSON (Stage recipeid recipe_type temp time) = object
-        [
-            "recipeid" .= recipeid,
-            "type" .= recipe_type,
-            "temp" .= temp,
-            "time" .= time
-        ]
-
-instance FromJSON Stage where
-    parseJSON (Object v) = Stage <$>
-        v .: "recipeid" .!= 0 <*>
-        v .: "type" <*>
-        v .: "temp" <*>
-        v .: "time"
+instance ToJSON Stage
+instance FromJSON Stage
 
 -- Sensosrs
-data Sensor = Sensor Text Text Text
-    deriving (Show)
+data Sensor = Sensor {
+    sensorId :: Maybe Integer
+    ,sensor_type :: Text
+    ,name :: Text
+    ,file :: Text
+} deriving (Show, Generic)
 
-instance ToJSON Sensor where
-    toJSON (Sensor sensortype name file) = object
-        [
-            "type" .= sensortype,
-            "name" .= name,
-            "file" .= file
-        ]
-
-
-instance FromJSON Sensor where
-    parseJSON (Object v) = Sensor <$>
-        v .: "type" <*>
-        v .: "name" <*>
-        v .: "file"
+instance ToJSON Sensor
+instance FromJSON Sensor
 
 -- Recipes
-data Recipe = Recipe Text Text Integer Integer Integer
-    deriving (Show)
+data Recipe = Recipe {
+    recipeId :: Maybe Integer
+    ,style :: Text
+    ,recipe_name :: Text
+    ,ibu :: Integer
+    ,abv :: Integer
+    ,color :: Integer
+} deriving (Show, Generic)
 
-instance ToJSON Recipe where
-    toJSON (Recipe style name ibu abv color) = object
-        [
-            "style" .= style,
-            "name" .= name,
-            "ibu" .= ibu,
-            "abv" .= abv,
-            "color" .= color
-        ]
 
 instance FromJSON Recipe where
     parseJSON (Object v) = Recipe <$>
-        v .: "style" <*>
-        v .: "name" <*>
-        v .: "ibu" <*>
-        v .: "abv" <*>
-        v .: "color"
+        v .:?  "id" <*>
+        v .:  "style" <*>
+        v .:  "name" <*>
+        v .:  "ibu" <*>
+        v .:  "abv" <*>
+        v .:  "color"
+
+instance ToJSON Recipe where
+    toJSON Recipe {..} = object 
+        [
+            "id" .= recipeId
+            ,"style" .= style
+            ,"name" .= recipe_name
+            ,"ibu" .= ibu
+            ,"abv" .= abv
+            ,"color" .= color
+        ]
+
 
 -- Ingredient
-data Ingredient = Ingredient Integer Text Text Integer
-    deriving (Show)
+data Ingredient = Ingredient {
+    ingredientId:: Maybe Integer
+    ,recipe :: Integer
+    ,ingredient_name :: Text
+    ,ingredient_type :: Text
+    ,unit :: Integer
+} deriving (Show, Generic)
 
-instance ToJSON Ingredient where
-    toJSON (Ingredient ingredientrecipe ingredientname ingredienttype unit) = object
-        [
-            "recipe" .= ingredientrecipe,
-            "name" .= ingredientname,
-            "type" .= ingredienttype,
-            "unit" .= unit
-        ]
-
-instance FromJSON Ingredient where
-    parseJSON (Object v) = Ingredient <$>
-        v .: "recipe" <*>
-        v .: "name" <*>
-        v .: "type" <*>
-        v .: "unit"
+instance FromJSON Ingredient
+instance ToJSON Ingredient
 
 -- Agents
-data Agent = Agent Text Text
-    deriving (Show)
+data Agent = Agent{
+    agentId:: Maybe Integer
+    ,agent_type :: Text
+    ,ip :: Text
+} deriving (Show, Generic)
 
-instance ToJSON Agent where
-    toJSON (Agent agenttype ip) = object
-        [
-            "type" .= agenttype,
-            "ip" .= ip
-        ]
+instance FromJSON Agent
+instance ToJSON Agent
 
-instance FromJSON Agent where
-    parseJSON (Object v) = Agent <$>
-        v .: "type" <*>
-        v .: "ip"
-
--- Response JSON
 --ErrorMessage
 data ErrorMessage = ErrorMessage Text
     deriving (Show)

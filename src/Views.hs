@@ -35,7 +35,7 @@ instance Response Sensor where
                         Nothing -> WS.json (ErrorMessage "Something unexpected")
 
 instance Response Recipe where
-    response recipe = case recipe of
+    response recipes = case recipes of
                         Just u -> WS.json u
                         Nothing -> WS.json (ErrorMessage "Something unexpected")
 

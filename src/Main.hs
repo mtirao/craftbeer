@@ -2,9 +2,19 @@
 
 module Main where
 
-import Db
+import Db.Db as Db
+import Db.Recipes 
+import Db.Sensors
+import Db.Agents
+import Db.Stages
+import Db.Users
+
+
 import Views
 import Domain
+
+import Controller.RecipesController
+import Controller.IngredientsController
 
 import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
@@ -58,9 +68,9 @@ main = do
                                                 Nothing -> do 
                                                             jsonResponse (ErrorMessage "User not nothing")
                                                             status badRequest400
-                                                Just (User pwd _ name lastname role) -> 
+                                                Just (User pwd _ usrname lastname role) -> 
                                                             if pwd == (password login) 
-                                                            then jsonResponse (UserResponse name lastname role) 
+                                                            then jsonResponse (UserResponse usrname lastname role) 
                                                                  
                                                             else do 
                                                                     jsonResponse (ErrorMessage "Wrong password") 
@@ -69,45 +79,61 @@ main = do
                 post "/accounts/signup" $ do 
                                             b <- body
                                             user <- return $ (decode b :: Maybe User)
-                                            insert pool user
-                                            response user
+                                            dbNewUser <- liftIO $ insert pool user
+                                            case dbNewUser of 
+                                                Nothing -> status status400
+                                                Just a -> signupResponse 
+                                                        where signupResponse = do
+                                                                                    jsonResponse a
+                                                                                    status status201 
 
                 -- STAGES
                 post "/craftbeer/stage" $ do
                                             b <- body
                                             stage <- return $ (decode b :: Maybe Stage)
-                                            insert pool stage
-                                            response stage
+                                            dbStage <- liftIO $ insert pool stage
+                                            case dbStage of 
+                                                Nothing -> status status400
+                                                Just a -> stageResponse 
+                                                        where stageResponse = do
+                                                                                    jsonResponse a
+                                                                                    status status201 
                                             
 
                 -- SENSORS
                 post "/craftbeer/sensor" $ do
                                             b <- body
                                             sensor <- return $ (decode b :: Maybe Sensor)
-                                            insert pool sensor
-                                            response sensor
+                                            dbSensor <- liftIO $ insert pool sensor
+                                            case dbSensor of 
+                                                Nothing -> status status400
+                                                Just a -> sensorResponse 
+                                                        where sensorResponse = do
+                                                                                    jsonResponse a
+                                                                                    status status201  
 
                 -- RECIPES
-                post "/craftbeer/recipe" $ do
-                                            b <- body
-                                            recipe <- return $ (decode b :: Maybe Recipe)
-                                            insert pool recipe
-                                            response recipe
+                post "/craftbeer/recipe" $ createRecipe pool body
+
+                delete "/craftbeer/recipe/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    deleteRecipe pool idd
+                                                    status status204
 
                 -- INGREDIENTS
-                post "/craftbeer/ingredient" $ do
-                                                b <- body
-                                                ingredient <- return $ (decode b :: Maybe Ingredient)
-                                                insert pool ingredient
-                                                response ingredient
+                post "/craftbeer/ingredient" $ createIngredient pool body 
 
                 -- AGENTS
                 post "/craftbeer/agent" $ do
                                             b <- body
                                             agent <- return $ (decode b :: Maybe Agent)
-                                            insert pool agent
-                                            response agent
-
+                                            dbAgent <- liftIO $ insert pool agent
+                                            case dbAgent of 
+                                                Nothing -> status status400
+                                                Just a -> agentResponse 
+                                                        where agentResponse = do
+                                                                                    jsonResponse a
+                                                                                    status status201  
               
                 -- LIST
                 get    "/articles" $ do 
@@ -120,23 +146,12 @@ main = do
                                             maybeArticle <- liftIO $ findArticle pool idd -- get the article from the DB
                                             viewArticle maybeArticle            -- show the article if it was found
 
-                -- CREATE
-                post   "/admin/articles" $ do 
-                                                article <- getArticleParam -- read the request body, try to parse it into article
-                                                insertArticle pool article -- insert the parsed article into the DB
-                                                createdArticle article     -- show info that the article was created
 
                 -- UPDATE
                 put    "/admin/articles" $ do 
                                                 article <- getArticleParam -- read the request body, try to parse it into article
                                                 updateArticle pool article -- update parsed article in the DB
                                                 updatedArticle article     -- show info that the article was updated
-
-                -- DELETE
-                delete "/admin/articles/:id" $ do 
-                                                    idd <- param "id" :: ActionM TL.Text -- get the article id
-                                                    deleteArticle pool idd  -- delete the article from the DB
-                                                    deletedArticle idd      -- show info that the article was deleted
 
 -----------------------------------------------
 
@@ -151,5 +166,6 @@ getLoginParam :: ActionT TL.Text IO (Maybe Login)
 getLoginParam = do 
                     b <- body
                     return $ (decode b :: Maybe Login)
+
 
               

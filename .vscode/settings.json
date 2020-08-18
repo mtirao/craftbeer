@@ -1,0 +1,4 @@
+{
+    "languageServerHaskell.hieExecutablePath": "~/.local/bin/hie",
+    "editor.detectIndentation": false
+}

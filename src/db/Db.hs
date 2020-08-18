@@ -1,7 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Db where
+module Db.Db where
+    
 import Domain
 
 import Web.Scotty.Internal.Types (ActionT)
@@ -93,13 +94,6 @@ findArticle pool id = do
            oneArticle _ = Nothing
 
 
-insertArticle :: Pool Connection -> Maybe Article -> ActionT TL.Text IO ()
-insertArticle pool Nothing = return ()
-insertArticle pool (Just (Article id title bodyText)) = do
-     liftIO $ execSqlT pool [title, bodyText]
-                            "INSERT INTO article(title, bodyText) VALUES(?,?)"
-     return ()
-
 updateArticle :: Pool Connection -> Maybe Article -> ActionT TL.Text IO ()
 updateArticle pool Nothing = return ()
 updateArticle pool (Just (Article id title bodyText)) = do
@@ -107,59 +101,11 @@ updateArticle pool (Just (Article id title bodyText)) = do
                             "UPDATE article SET title=?, bodyText=? WHERE id=?"
      return ()
 
-deleteArticle :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
-deleteArticle pool id = do
-     liftIO $ execSqlT pool [id] "DELETE FROM article WHERE id=?"
-     return ()
 
 
 --------------------------------------------------------------------------------
 class DbOperation a where 
-    insert :: Pool Connection -> Maybe a -> ActionT TL.Text IO ()
-
-
-instance DbOperation User where
-    insert pool Nothing = return ()
-    insert pool (Just (User user password name lastname role)) = do
-        liftIO $ execSqlT pool [role, password, user, name, lastname]
-                            "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?)"
-        return () 
-
-instance DbOperation Stage where
-    insert pool Nothing = return ()
-    insert pool (Just (Stage recipeid recipe_type temp time)) = do
-        liftIO $ execSqlT pool [recipeid, recipe_type, temp, time]
-                            "INSERT INTO recipe(recipeid, type, temp, time) VALUES(?,?,?,?)"
-        return () 
-
-instance DbOperation Sensor where
-    insert pool Nothing = return ()
-    insert pool (Just (Sensor sensortype name file)) = do
-        liftIO $ execSqlT pool [sensortype, name, file]
-                            "INSERT INTO sensors(type, name, file) VALUES(?,?,?)"
-        return () 
-
-instance DbOperation Recipe where
-    insert pool Nothing = return ()
-    insert pool (Just (Recipe style name ibu abv color)) = do
-        liftIO $ execSqlT pool [style, name, (TL.decodeUtf8 $ BL.pack $ show ibu), (TL.decodeUtf8 $ BL.pack $ show abv), (TL.decodeUtf8 $ BL.pack $ show color)]
-                            "INSERT INTO recipes(style, name, ibu, abv, color) VALUES(?,?,?,?,?)"
-        return () 
-
-instance DbOperation Ingredient where
-    insert pool Nothing = return ()
-    insert pool (Just (Ingredient recipe name ingredienttype unit)) = do
-        liftIO $ execSqlT pool [(TL.decodeUtf8 $ BL.pack $ show recipe), name, ingredienttype, (TL.decodeUtf8 $ BL.pack $ show unit)]
-                            "INSERT INTO ingredient(recipe, name, type, unit) VALUES(?,?,?,?)"
-        return () 
-
-instance DbOperation Agent where
-    insert pool Nothing = return ()
-    insert pool (Just (Agent agenttype ip)) = do
-        liftIO $ execSqlT pool [agenttype, ip]
-                            "INSERT INTO agents(type, ip, type, unit) VALUES(?,?)"
-        return () 
-
-
+    insert :: Pool Connection -> Maybe a -> IO (Maybe a)  --Pool Connection -> Maybe a -> ActionT TL.Text IO ()
+    update :: Pool Connection -> Maybe a -> IO (Maybe a)
 
 --------------------------------------------------------------------------------

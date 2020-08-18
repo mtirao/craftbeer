@@ -7,7 +7,7 @@ build-type:    Simple
 executable          craftbeer
     hs-source-dirs: src
     main-is:        Main.hs
-    ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N 
+    ghc-options:    -threaded -O2 -rtsopts -with-rtsopts=-N  -Wname-shadowing
     extensions:     OverloadedStrings
     build-depends:  base                          >=4.6 && <4.7
                     , scotty                        >= 0.9.1
@@ -28,7 +28,18 @@ executable          craftbeer
                     , http-types
 
     other-modules: 
-        Auth Db Domain Views
+        Auth 
+        ,Domain
+        ,Views
+        ,Db.Db
+        ,Db.Recipes
+        ,Db.Agents
+        ,Db.Sensors 
+        ,Db.Stages 
+        ,Db.Ingredients 
+        ,Db.Users  
+        ,Controller.RecipesController
+        ,Controller.IngredientsController
 
 
                   
