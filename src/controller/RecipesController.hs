@@ -45,6 +45,22 @@ createRecipe pool body  = do
                                                                                                         jsonResponse a
                                                                                                         status status201  
 
+updateRecipe pool body id  = do
+                            b <- body
+                            rcpe <- return $ (decode b :: Maybe Recipe)
+                            case rcpe of
+                                Nothing -> status status400
+                                Just _ -> recipeResponse 
+                                        where recipeResponse = do 
+                                                                    dbRecipe <- liftIO $ update pool rcpe id
+                                                                    case dbRecipe of
+                                                                        Nothing -> status status400
+                                                                        Just a -> dbRecipeResponse 
+                                                                                where dbRecipeResponse = do
+                                                                                                        jsonResponse a
+                                                                                                        status status201  
+
+
 listRecipes pool =  do
                         recipes <- liftIO $ findRecipes pool  -- get the ist of articles for DB
                         jsonResponse recipes 

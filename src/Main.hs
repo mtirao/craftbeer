@@ -38,11 +38,11 @@ import Database.PostgreSQL.Simple
 -- Parse file "application.conf" and get the DB connection info
 makeDbConfig :: C.Config -> IO (Maybe Db.DbConfig)
 makeDbConfig conf = do
-    name <- C.lookup conf "database.name" :: IO (Maybe String)
-    user <- C.lookup conf "database.user" :: IO (Maybe String)
+    dbConfname <- C.lookup conf "database.name" :: IO (Maybe String)
+    dbConfUser <- C.lookup conf "database.user" :: IO (Maybe String)
     dbConfPassword <- C.lookup conf "database.password" :: IO (Maybe String)
-    return $ DbConfig <$> name
-                    <*> user
+    return $ DbConfig <$> dbConfname
+                    <*> dbConfUser
                     <*> dbConfPassword
 
 main :: IO ()
@@ -114,6 +114,9 @@ main = do
 
                 -- RECIPES
                 post "/craftbeer/recipe" $ createRecipe pool body
+                put "/craftbeer/recipe/:id" $ do 
+                                                idd <- param "id" :: ActionM TL.Text
+                                                updateRecipe pool body idd
                 delete "/craftbeer/recipe/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteRecipe pool idd

@@ -106,6 +106,6 @@ updateArticle pool (Just (Article id title bodyText)) = do
 --------------------------------------------------------------------------------
 class DbOperation a where 
     insert :: Pool Connection -> Maybe a -> IO (Maybe a)  --Pool Connection -> Maybe a -> ActionT TL.Text IO ()
-    update :: Pool Connection -> Maybe a -> IO (Maybe a)
+    update :: Pool Connection -> Maybe a -> TL.Text -> IO (Maybe a)
 
 --------------------------------------------------------------------------------

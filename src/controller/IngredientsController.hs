@@ -30,8 +30,8 @@ import Network.HTTP.Types.Status
 import Data.Aeson
 
 
-createIngredient pool body = do
-                                b <- body
+createIngredient pool bodyI = do
+                                b <- bodyI
                                 ingredient <- return $ (decode b :: Maybe Ingredient)
                                 case ingredient of
                                     Nothing -> status status400

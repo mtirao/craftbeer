@@ -26,7 +26,7 @@ instance DbOperation Stage where
             where oneStage ((id, recipeid, recipe_type, temp, time) : _) = Just $ Stage id recipeid recipe_type temp time
                   oneStage _ = Nothing
     
-    update pool (Just (Stage id recipeid recipe_type temp time)) = do
+    update pool (Just (Stage _ recipeid recipe_type temp time)) id = do
         res <- fetch pool (recipeid, recipe_type, temp, time, id)
                             "UPDATE stages SET recipeid=?, type=?, temp=?, time=? WHERE id=? RETURNING  id, recipeid, type, temp, time" :: IO [(Maybe Integer, Integer, Integer, Integer, Integer )]
         return $ oneStage res

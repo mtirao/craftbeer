@@ -27,7 +27,7 @@ instance DbOperation Agent where
             where oneAgent ((id, agenttype, ip) : _) = Just $ Agent id agenttype ip
                   oneAgent _ = Nothing
     
-    update pool (Just (Agent id agenttype ip)) = do
+    update pool (Just (Agent _ agenttype ip)) id= do
         res <- fetch pool (agenttype, ip, id)
                             "UPDATE agents SET agenttype=?, ip=?  WHERE id=?" :: IO [(Maybe Integer, TL.Text, TL.Text)]
         return $ oneAgent res

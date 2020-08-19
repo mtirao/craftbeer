@@ -27,8 +27,8 @@ instance DbOperation Recipe where
             where oneRecipe ((id, style, name, ibu, abv, color) : _) = Just $ Recipe id style name ibu abv color
                   oneRecipe _ = Nothing
 
-    update pool (Just (Recipe id style name ibu abv color)) = do
-        res <- fetch pool (style, name, ibu, abv, color, id)
+    update pool (Just (Recipe _ style name ibu abv color)) idd= do
+        res <- fetch pool (style, name, ibu, abv, color, idd)
                             "UPDATE recipes SET style=?, name=?, ibu=?, abv=?, color=? WHERE id=? RETURNING  id, style, name, ibu, abv, color" :: IO [(Maybe Integer, TL.Text, TL.Text, Integer, Integer, Integer )]
         return $ oneRecipe res
             where oneRecipe ((id, style, name, ibu, abv, color) : _) = Just $ Recipe id style name ibu abv color

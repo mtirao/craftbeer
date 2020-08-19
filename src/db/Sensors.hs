@@ -26,7 +26,7 @@ instance DbOperation Sensor where
             where oneSensor ((id, sensortype, name, file) : _) = Just $ Sensor id sensortype name file
                   oneSensor _ = Nothing
 
-    update pool (Just (Sensor id sensortype name file)) = do
+    update pool (Just (Sensor _ sensortype name file)) id = do
         res <- fetch pool (sensortype, name, file, id)
                             "UPDATE sensors SET type=?, name=?, file=? WHERE id=? RETURNING  id, type, name, file" :: IO [(Maybe Integer, TL.Text, TL.Text, TL.Text )]
         return $ oneSensor res

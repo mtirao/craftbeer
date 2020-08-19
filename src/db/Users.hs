@@ -28,7 +28,7 @@ instance DbOperation User where
             where oneUser ((id, role, password, user, name, lastname) : _) = Just $ User user password name lastname role
                   oneUser _ = Nothing
     
-    update pool (Just (User user password name lastname role)) = do
+    update pool (Just (User user password name lastname role)) id = do
         res <- fetch pool (role, password, user, name, lastname)
                             "INSERT INTO users(role, password, username, name, lastname) VALUES(?,?,?,?,?) RETURNING id, role, password, user, name, lastname" :: IO [(Integer, TL.Text, TL.Text, TL.Text, TL.Text, TL.Text )]
         return $ oneUser res
