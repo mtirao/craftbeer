@@ -15,21 +15,6 @@ import Data.Aeson
 import Control.Applicative
 import GHC.Generics
 
-data Article = Article Integer Text Text -- id title bodyText
-     deriving (Show)
-
-instance FromJSON Article where
-     parseJSON (Object v) = Article <$>
-                            v .:? "id" .!= 0 <*> -- the field "id" is optional
-                            v .:  "title"    <*>
-                            v .:  "bodyText"
-
-instance ToJSON Article where
-     toJSON (Article id title bodyText) =
-         object ["id" .= id,
-                 "title" .= title,
-                 "bodyText" .= bodyText]
-
 -- Request Json
 -- Error
 
@@ -171,12 +156,12 @@ instance ToJSON UserResponse where
         ]
 
 -- Getters
-username :: Maybe Login -> Text
-username a = case a of
+getUserName :: Maybe Login -> Text
+getUserName a = case a of
                 Nothing -> ""
                 Just (Login u p) -> u   
 
-password :: Maybe Login -> Text
-password a = case a of
+getPassword :: Maybe Login -> Text
+getPassword a = case a of
                 Nothing -> ""
                 Just (Login u p) -> p

@@ -35,12 +35,13 @@ createIngredient pool bodyI = do
                                 ingredient <- return $ (decode b :: Maybe Ingredient)
                                 case ingredient of
                                     Nothing -> status status400
-                                    Just _ -> ingredientResponse 
-                                            where ingredientResponse = do 
-                                                                            dbIngredient <- liftIO $ insert pool ingredient
-                                                                            case dbIngredient of
-                                                                                    Nothing -> status status400
-                                                                                    Just a -> dbIngredientResponse 
-                                                                                            where dbIngredientResponse = do
-                                                                                                                    jsonResponse a
-                                                                                                                    status status201
+                                    Just _ -> ingredientResponse pool ingredient
+
+ingredientResponse pool ingredient = do 
+                                        dbIngredient <- liftIO $ insert pool ingredient
+                                        case dbIngredient of
+                                                Nothing -> status status400
+                                                Just a -> dbIngredientResponse 
+                                                        where dbIngredientResponse = do
+                                                                                jsonResponse a
+                                                                                status status201

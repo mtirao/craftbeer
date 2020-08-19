@@ -29,38 +29,50 @@ import Network.HTTP.Types.Status
 
 import Data.Aeson
 
-
-createRecipe pool body  = do
-                            b <- body
+-----CREATE
+createRecipe pool cbody  = do
+                            b <- cbody
                             rcpe <- return $ (decode b :: Maybe Recipe)
                             case rcpe of
                                 Nothing -> status status400
-                                Just _ -> recipeResponse 
-                                        where recipeResponse = do 
-                                                                    dbRecipe <- liftIO $ insert pool rcpe
-                                                                    case dbRecipe of
-                                                                        Nothing -> status status400
-                                                                        Just a -> dbRecipeResponse 
-                                                                                where dbRecipeResponse = do
-                                                                                                        jsonResponse a
-                                                                                                        status status201  
+                                Just _ -> createRecipeResponse pool rcpe
+                                         
 
-updateRecipe pool body id  = do
-                            b <- body
+createRecipeResponse pool rcpe = do 
+                                dbRecipe <- liftIO $ insert pool rcpe
+                                case dbRecipe of
+                                    Nothing -> status status400
+                                    Just a -> dbRecipeResponse 
+                                            where dbRecipeResponse = do
+                                                                    jsonResponse a
+                                                                    status status201 
+----UPDATE
+updateRecipe pool ubody idd  = do
+                            b <- ubody
                             rcpe <- return $ (decode b :: Maybe Recipe)
                             case rcpe of
                                 Nothing -> status status400
-                                Just _ -> recipeResponse 
-                                        where recipeResponse = do 
-                                                                    dbRecipe <- liftIO $ update pool rcpe id
-                                                                    case dbRecipe of
-                                                                        Nothing -> status status400
-                                                                        Just a -> dbRecipeResponse 
-                                                                                where dbRecipeResponse = do
-                                                                                                        jsonResponse a
-                                                                                                        status status201  
+                                Just _ -> updateRecipeResponse pool rcpe idd 
 
+updateRecipeResponse pool urcpe  idd = do 
+                                        dbRecipe <- liftIO $ update pool urcpe idd
+                                        case dbRecipe of
+                                            Nothing -> status status400
+                                            Just a -> dbRecipeResponse 
+                                                    where dbRecipeResponse = do
+                                                                            jsonResponse a
+                                                                            status status201  
 
 listRecipes pool =  do
-                        recipes <- liftIO $ findRecipes pool  -- get the ist of articles for DB
+                        recipes <- liftIO $ findRecipes pool 
                         jsonResponse recipes 
+
+getRecipe pool idd = do 
+                        maybeRecipe <- liftIO $ findRecipe pool idd
+                        case maybeRecipe of
+                            Nothing -> status status400
+                            Just a -> jsonResponse a 
+
+deleteRecipeId pool idd = do
+                            deleteRecipe pool idd
+                            status status204

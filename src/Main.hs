@@ -63,13 +63,13 @@ main = do
                 post   "/accounts/login" $ do 
                                             b <- body
                                             login <- return $ (decode b :: Maybe Login)
-                                            result <- liftIO $ findUserByLogin pool (TL.unpack (username login))
+                                            result <- liftIO $ findUserByLogin pool (TL.unpack (getUserName login))
                                             case result of 
                                                 Nothing -> do 
                                                             jsonResponse (ErrorMessage "User not nothing")
                                                             status badRequest400
                                                 Just (User pwd _ usrname lastname role) -> 
-                                                            if pwd == (password login) 
+                                                            if pwd == (getPassword login) 
                                                             then jsonResponse (UserResponse usrname lastname role) 
                                                                  
                                                             else do 
@@ -119,15 +119,11 @@ main = do
                                                 updateRecipe pool body idd
                 delete "/craftbeer/recipe/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
-                                                    deleteRecipe pool idd
-                                                    status status204
+                                                    deleteRecipeId pool idd
                                                     
                 get "/craftbeer/recipe/:id" $ do   
                                                 idd <- param "id" :: ActionM TL.Text
-                                                maybeRecipe <- liftIO $ findRecipe pool idd
-                                                case maybeRecipe of
-                                                    Nothing -> status status400
-                                                    Just a -> jsonResponse a 
+                                                getRecipe pool idd
 
                 get "/craftbeer/recipes" $ listRecipes pool                                      
                                                                                         
@@ -147,31 +143,8 @@ main = do
                                                                                     jsonResponse a
                                                                                     status status201  
               
-                -- LIST
-                get    "/articles" $ do 
-                                        articles <- liftIO $ listArticles pool  -- get the ist of articles for DB
-                                        articlesList articles                   -- show articles list
-
-                -- VIEW
-                get    "/articles/:id" $ do 
-                                            idd <- param "id" :: ActionM TL.Text -- get the article id from the request
-                                            maybeArticle <- liftIO $ findArticle pool idd -- get the article from the DB
-                                            viewArticle maybeArticle            -- show the article if it was found
-
-
-                -- UPDATE
-                put    "/admin/articles" $ do 
-                                                article <- getArticleParam -- read the request body, try to parse it into article
-                                                updateArticle pool article -- update parsed article in the DB
-                                                updatedArticle article     -- show info that the article was updated
-
+                
 -----------------------------------------------
-
--- Parse the request body into the Article
-getArticleParam :: ActionT TL.Text IO (Maybe Article)
-getArticleParam = do 
-                    b <- body
-                    return $ (decode b :: Maybe Article)
 
 -- Parse the request body into the Login
 getLoginParam :: ActionT TL.Text IO (Maybe Login)

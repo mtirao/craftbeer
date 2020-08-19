@@ -21,23 +21,6 @@ jsonResponse e = WS.json e
 
 
 --------------------------------------------------------------------------------
-articlesList :: [Article] -> ActionM ()
-articlesList articles = WS.json articles
-
-viewArticle :: Maybe Article -> ActionM ()
-viewArticle Nothing = WS.json ()
-viewArticle (Just article) = WS.json article
-
-createdArticle :: Maybe Article -> ActionM ()
-createdArticle _ = WS.json ()
-
-updatedArticle :: Maybe Article -> ActionM ()
-updatedArticle _ = WS.json ()
-
-deletedArticle :: TL.Text -> ActionM ()
-deletedArticle _ = WS.json ()
-
---------------------------------------------------------------------------------
 
 createdUser :: Maybe User -> ActionM ()
 createdUser user = case user of

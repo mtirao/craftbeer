@@ -81,29 +81,6 @@ findUserByLogin pool login = do
 
 --------------------------------------------------------------------------------
 
-listArticles :: Pool Connection -> IO [Article]
-listArticles pool = do
-     res <- fetchSimple pool "SELECT * FROM article ORDER BY id DESC" :: IO [(Integer, TL.Text, TL.Text)]
-     return $ map (\(id, title, bodyText) -> Article id title bodyText) res
-   
-findArticle :: Pool Connection -> TL.Text -> IO (Maybe Article)
-findArticle pool id = do
-     res <- fetch pool (Only id) "SELECT * FROM article WHERE id=?" :: IO [(Integer, TL.Text, TL.Text)]
-     return $ oneArticle res
-     where oneArticle ((id, title, bodyText) : _) = Just $ Article id title bodyText
-           oneArticle _ = Nothing
-
-
-updateArticle :: Pool Connection -> Maybe Article -> ActionT TL.Text IO ()
-updateArticle pool Nothing = return ()
-updateArticle pool (Just (Article id title bodyText)) = do
-     liftIO $ execSqlT pool [title, bodyText, (TL.decodeUtf8 $ BL.pack $ show id)]
-                            "UPDATE article SET title=?, bodyText=? WHERE id=?"
-     return ()
-
-
-
---------------------------------------------------------------------------------
 class DbOperation a where 
     insert :: Pool Connection -> Maybe a -> IO (Maybe a)  --Pool Connection -> Maybe a -> ActionT TL.Text IO ()
     update :: Pool Connection -> Maybe a -> TL.Text -> IO (Maybe a)
