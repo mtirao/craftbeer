@@ -32,4 +32,20 @@ instance DbOperation Ingredient where
         return $ oneIngredient res
             where oneIngredient ((id, recipe, name ,ingredienttype, unit) : _) = Just $ Ingredient id recipe name ingredienttype unit
                   oneIngredient _ = Nothing
- 
+    
+    find  pool id = do 
+                        res <- fetch pool (Only id) "SELECT id, recipe, name, type, unit FROM ingredients WHERE id=?" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
+                        return $ oneIngredient res
+                        where oneIngredient ((id, recipe, name ,ingredienttype, unit) : _) = Just $ Ingredient id recipe name ingredienttype unit
+                              oneIngredient _ = Nothing
+
+    list  pool = do
+                    res <- fetchSimple pool "SELECT id, recipe, name, type, unit FROM ingredients" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
+                    return $ map (\(id, recipe, name, ingredienttype, unit) -> Ingredient id recipe name ingredienttype unit) res
+
+
+deleteIngredient :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
+deleteIngredient pool id = do 
+                                _ <- liftIO $ execSqlT pool [id] "DELETE FROM ingredients WHERE id=?"
+                                return ()
+

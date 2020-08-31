@@ -40,6 +40,7 @@ executable          craftbeer
         ,Db.Users  
         ,Controller.RecipesController
         ,Controller.IngredientsController
+        ,Controller.AgentsController
 
 
                   

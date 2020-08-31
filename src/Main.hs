@@ -15,6 +15,7 @@ import Domain
 
 import Controller.RecipesController
 import Controller.IngredientsController
+import Controller.AgentsController
 
 import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
@@ -117,6 +118,7 @@ main = do
                 put "/craftbeer/recipe/:id" $ do 
                                                 idd <- param "id" :: ActionM TL.Text
                                                 updateRecipe pool body idd
+                                                
                 delete "/craftbeer/recipe/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteRecipeId pool idd
@@ -130,18 +132,35 @@ main = do
                                                 
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ createIngredient pool body 
+                put "/craftbeer/ingredient/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    updateRecipe pool body idd
+
+                delete "/craftbeer/ingredient/:id" $ do 
+                                                        idd <- param "id" :: ActionM TL.Text
+                                                        deleteIngredientId pool idd
+
+                get "/craftbeer/ingredient/:id" $ do
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    getIngredient pool idd
+
+                get "/craftbeer/ingredients" $ listIngredients pool
 
                 -- AGENTS
-                post "/craftbeer/agent" $ do
-                                            b <- body
-                                            agent <- return $ (decode b :: Maybe Agent)
-                                            dbAgent <- liftIO $ insert pool agent
-                                            case dbAgent of 
-                                                Nothing -> status status400
-                                                Just a -> agentResponse 
-                                                        where agentResponse = do
-                                                                                    jsonResponse a
-                                                                                    status status201  
+                post "/craftbeer/agent" $ createAgent pool body
+                put "/craftbeer/agent/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    updateAgent pool body idd
+
+                delete "/craftbeer/agent/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    deleteAgentId pool idd
+
+                get "/craftbeer/agent/:id" $ do
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    getAgent pool idd
+
+                get "/craftbeer/agent" $ listAgents pool
               
                 
 -----------------------------------------------

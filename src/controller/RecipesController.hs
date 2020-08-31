@@ -63,16 +63,18 @@ updateRecipeResponse pool urcpe  idd = do
                                                                             jsonResponse a
                                                                             status status201  
 
+---GET & LIST
 listRecipes pool =  do
-                        recipes <- liftIO $ findRecipes pool 
+                        recipes <- liftIO $ (list pool :: IO [Recipe])
                         jsonResponse recipes 
 
 getRecipe pool idd = do 
-                        maybeRecipe <- liftIO $ findRecipe pool idd
+                        maybeRecipe <- liftIO $ (find pool idd :: IO (Maybe Recipe))
                         case maybeRecipe of
                             Nothing -> status status400
                             Just a -> jsonResponse a 
 
+---DELETE
 deleteRecipeId pool idd = do
                             deleteRecipe pool idd
                             status status204

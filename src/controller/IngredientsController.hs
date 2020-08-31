@@ -30,6 +30,7 @@ import Network.HTTP.Types.Status
 import Data.Aeson
 
 
+---CREATE
 createIngredient pool bodyI = do
                                 b <- bodyI
                                 ingredient <- return $ (decode b :: Maybe Ingredient)
@@ -45,3 +46,35 @@ ingredientResponse pool ingredient = do
                                                         where dbIngredientResponse = do
                                                                                 jsonResponse a
                                                                                 status status201
+
+----UPDATE
+updateIngredientResponse pool urcpe  idd = do 
+                                        dbIngredient <- liftIO $ update pool urcpe idd
+                                        case dbIngredient of
+                                            Nothing -> status status400
+                                            Just a -> dbIngredient 
+                                                    where dbIngredient = do
+                                                                            jsonResponse a
+                                                                            status status201  
+updateIngredient pool ubody idd = do
+                                b <- ubody
+                                rcpe <- return $ (decode b :: Maybe Ingredient)
+                                case rcpe of
+                                    Nothing -> status status400
+                                    Just _ -> updateIngredientResponse pool rcpe idd 
+
+---GET & LIST
+listIngredients pool =  do
+                        ingredients <- liftIO $ (list pool :: IO [Ingredient])
+                        jsonResponse ingredients 
+
+getIngredient pool idd = do 
+                        maybeIngredient <- liftIO $ (find pool idd :: IO (Maybe Ingredient))
+                        case maybeIngredient  of
+                            Nothing -> status status400
+                            Just a -> jsonResponse a 
+
+---DELETE
+deleteIngredientId pool idd = do
+                            deleteIngredient pool idd
+                            status status204
