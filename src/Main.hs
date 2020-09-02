@@ -16,6 +16,8 @@ import Domain
 import Controller.RecipesController
 import Controller.IngredientsController
 import Controller.AgentsController
+import Controller.SensorsController
+import Controller.StagesController
 
 import Web.Scotty
 import Web.Scotty.Internal.Types (ActionT)
@@ -102,6 +104,22 @@ main = do
                                             
 
                 -- SENSORS
+
+                post "/craftbeer/sensor" $ createSensor pool body
+                put "/craftbeer/sensor/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    updateSensor pool body idd
+
+                delete "/craftbeer/sensor/:id" $ do 
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    deleteSensorId pool idd
+
+                get "/craftbeer/sensor/:id" $ do
+                                                    idd <- param "id" :: ActionM TL.Text
+                                                    getSensor pool idd
+
+                get "/craftbeer/sensor" $ listSensors pool
+
                 post "/craftbeer/sensor" $ do
                                             b <- body
                                             sensor <- return $ (decode b :: Maybe Sensor)

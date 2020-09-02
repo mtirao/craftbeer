@@ -1,5 +1,5 @@
 name:          craftbeer
-version:       0.0.0
+version:       1.0.5
 cabal-version: >= 1.8
 build-type:    Simple
 
@@ -41,6 +41,8 @@ executable          craftbeer
         ,Controller.RecipesController
         ,Controller.IngredientsController
         ,Controller.AgentsController
+        ,Controller.StagesController
+        ,Controller.SensorsController
 
 
                   

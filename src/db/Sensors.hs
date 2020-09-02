@@ -32,3 +32,19 @@ instance DbOperation Sensor where
         return $ oneSensor res
             where oneSensor ((id, sensortype, name, file) : _) = Just $ Sensor id sensortype name file
                   oneSensor _ = Nothing
+
+    find  pool id = do 
+                        res <- fetch pool (Only id) "SELECT id, type, name, file FROM sensors WHERE id=?" :: IO [(Maybe Integer, TL.Text, TL.Text, TL.Text )]
+                        return $ oneSensor res
+                        where oneSensor ((id, sensortype, name, file) : _) = Just $ Sensor id sensortype name file
+                              oneSensor _ = Nothing
+
+    list  pool = do
+                    res <- fetchSimple pool "SELECT id, type, name, file FROM sensors" :: IO [(Maybe Integer, TL.Text, TL.Text, TL.Text )]
+                    return $ map (\(id, sensortype, name, file) -> Sensor id sensortype name file) res
+
+
+deleteSensor :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
+deleteSensor pool id = do 
+                        _ <- liftIO $ execSqlT pool [id] "DELETE FROM sensors WHERE id=?"
+                        return ()
