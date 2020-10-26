@@ -20,7 +20,8 @@ import GHC.Int
 data DbConfig = DbConfig {
         dbName :: String,
         dbUser :: String,
-        dbPassword :: String
+        dbPassword :: String,
+        dbHost :: String
     } deriving (Show, Generic)
 
 -- The function knows how to create new DB connection
@@ -30,6 +31,7 @@ newConn conf = connect defaultConnectInfo
                        { connectUser = dbUser conf
                        , connectPassword = dbPassword conf
                        , connectDatabase = dbName conf
+                       , connectHost = dbHost conf
                        }
 
 --------------------------------------------------------------------------------

@@ -44,9 +44,11 @@ makeDbConfig conf = do
     dbConfname <- C.lookup conf "database.name" :: IO (Maybe String)
     dbConfUser <- C.lookup conf "database.user" :: IO (Maybe String)
     dbConfPassword <- C.lookup conf "database.password" :: IO (Maybe String)
+    dbConfHost <- C.lookup conf "database.host" :: IO (Maybe String)
     return $ DbConfig <$> dbConfname
                     <*> dbConfUser
                     <*> dbConfPassword
+                    <*> dbConfHost
 
 main :: IO ()
 main = do
