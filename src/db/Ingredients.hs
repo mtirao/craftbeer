@@ -19,29 +19,28 @@ import GHC.Int
 
 
 instance DbOperation Ingredient where
-    insert pool (Just (Ingredient _ recipe name ingredienttype unit)) = do
-        res <- fetch pool (recipe, name ,ingredienttype, unit)
-                            "INSERT INTO ingredients(recipe, name, type, unit) VALUES(?,?,?,?) RETURNING  id, recipe, name, type, unit" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
+    insert pool (Just (Ingredient _ recipe name ingredienttype unit value)) = do
+        res <- fetch pool (recipe, name ,ingredienttype, unit, value)
+                            "INSERT INTO ingredients(recipe, name, type, unit, value) VALUES(?,?,?,?,?) RETURNING  id, recipe, name, type, unit, value" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
         return $ oneIngredient res
-            where oneIngredient ((id, recipe, name ,ingredienttype, unit) : _) = Just $ Ingredient id recipe name ingredienttype unit
-                  oneIngredient _ = Nothing
 
-    update pool (Just (Ingredient _ recipe name ingredienttype unit)) id= do
-        res <- fetch pool (recipe, name ,ingredienttype, unit, id)
-                            "UPDATE ingredients set recipe=?, name=?, type=?, unit=? WHERE id=? RETURNING  id, recipe, name, type, unit" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
+    update pool (Just (Ingredient _ recipe name ingredienttype unit value)) id= do
+        res <- fetch pool (recipe, name ,ingredienttype, unit, value, id)
+                            "UPDATE ingredients set recipe=?, name=?, type=?, unit=?, value=? WHERE id=? RETURNING  id, recipe, name, type, unit, value" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
         return $ oneIngredient res
-            where oneIngredient ((id, recipe, name ,ingredienttype, unit) : _) = Just $ Ingredient id recipe name ingredienttype unit
-                  oneIngredient _ = Nothing
     
     find  pool id = do 
-                        res <- fetch pool (Only id) "SELECT id, recipe, name, type, unit FROM ingredients WHERE id=?" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
+                        res <- fetch pool (Only id) "SELECT id, recipe, name, type, unit, value FROM ingredients WHERE id=?" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
                         return $ oneIngredient res
-                        where oneIngredient ((id, recipe, name ,ingredienttype, unit) : _) = Just $ Ingredient id recipe name ingredienttype unit
-                              oneIngredient _ = Nothing
 
     list  pool = do
-                    res <- fetchSimple pool "SELECT id, recipe, name, type, unit FROM ingredients" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer)]
-                    return $ map (\(id, recipe, name, ingredienttype, unit) -> Ingredient id recipe name ingredienttype unit) res
+                    res <- fetchSimple pool "SELECT id, recipe, name, type, unit, value FROM ingredients" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
+                    return $ map (\(id, recipe, name, ingredienttype, unit, value) -> Ingredient id recipe name ingredienttype unit value) res
+
+-- Function to convert tuple -> Maybe Ingredient
+oneIngredient :: [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)] -> Maybe Ingredient
+oneIngredient ((id, recipe, name ,ingredienttype, unit, value) : _) = Just $ Ingredient id recipe name ingredienttype unit value
+oneIngredient _ = Nothing
 
 
 deleteIngredient :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()

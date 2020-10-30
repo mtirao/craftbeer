@@ -118,6 +118,7 @@ data Ingredient = Ingredient {
     ,ingredient_name :: Text
     ,ingredient_type :: Text
     ,unit :: Integer
+    ,value :: Integer
 } deriving (Show, Generic)
 
 instance FromJSON Ingredient

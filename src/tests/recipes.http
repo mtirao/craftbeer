@@ -1,3 +1,5 @@
-GET http://localhost:3000/craftbeer/recipes
+//GET http://localhost:3000/craftbeer/recipes
 
-GET http://localhost:3000/craftbeer/recipe/ingredient/3
+//GET http://localhost:3000/craftbeer/recipe/ingredients/3
+
+GET http://localhost:3000/craftbeer/recipe/stages/3

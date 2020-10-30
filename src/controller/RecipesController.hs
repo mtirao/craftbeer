@@ -74,6 +74,15 @@ getRecipe pool idd = do
                             Nothing -> status status400
                             Just a -> jsonResponse a 
 
+getIngredientRecipe pool idd = do 
+                                ingredients <- liftIO $ (findIngredient pool idd :: IO [Ingredient])
+                                jsonResponse ingredients 
+
+getStagesRecipe pool idd = do 
+                            stages <- liftIO $ (findStage pool idd :: IO [Stage])
+                            jsonResponse stages
+
+
 ---DELETE
 deleteRecipeId pool idd = do
                             deleteRecipe pool idd

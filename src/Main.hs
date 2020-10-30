@@ -148,7 +148,14 @@ main = do
                                                 getRecipe pool idd
 
                 get "/craftbeer/recipes" $ listRecipes pool                                      
-                                                                                        
+
+                get "/craftbeer/recipe/ingredients/:id" $ do  
+                                                            idd <- param "id" :: ActionM TL.Text
+                                                            getIngredientRecipe pool idd   
+                
+                get "/craftbeer/recipe/stages/:id" $ do  
+                                                        idd <- param "id" :: ActionM TL.Text
+                                                        getStagesRecipe pool idd                                                              
                                                 
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ createIngredient pool body 
@@ -165,6 +172,7 @@ main = do
                                                     getIngredient pool idd
 
                 get "/craftbeer/ingredients" $ listIngredients pool
+
 
                 -- AGENTS
                 post "/craftbeer/agent" $ createAgent pool body
