@@ -63,10 +63,26 @@ data Stage = Stage{
     ,stage_type :: Integer
     ,temp :: Integer
     ,time :: Integer
-} deriving (Show, Generic)
+} deriving (Show)
 
-instance ToJSON Stage
-instance FromJSON Stage
+instance ToJSON Stage where
+    toJSON (Stage stageId belong_to stage_type temp time) = object
+        [
+            "id" .= stageId,
+            "recipe" .= belong_to,
+            "type" .= stage_type,
+            "temp" .= temp,
+            "time" .= time
+        ]
+
+instance FromJSON Stage where
+    parseJSON (Object v) = Stage <$>
+        v .:  "id" <*>
+        v .:  "recipe" <*>
+        v .:  "type" <*>
+        v .:  "temp" <*>
+        v .:  "time"
+
 
 -- Sensosrs
 data Sensor = Sensor {
@@ -121,8 +137,25 @@ data Ingredient = Ingredient {
     ,value :: Integer
 } deriving (Show, Generic)
 
-instance FromJSON Ingredient
-instance ToJSON Ingredient
+instance FromJSON Ingredient where
+    parseJSON (Object v) = Ingredient <$>
+        v .:?  "id" <*>
+        v .:  "recipe" <*>
+        v .:  "name" <*>
+        v .:  "type" <*>
+        v .:  "unit" <*>
+        v .:  "value"
+
+instance ToJSON Ingredient where
+    toJSON Ingredient {..} = object 
+        [
+            "id" .= ingredientId
+            ,"recipe" .= recipe
+            ,"name" .= ingredient_name
+            ,"type" .= ingredient_type
+            ,"unit" .= unit
+            ,"value" .= value
+        ]
 
 -- Agents
 data Agent = Agent{
