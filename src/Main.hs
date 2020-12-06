@@ -149,11 +149,11 @@ main = do
 
                 get "/craftbeer/recipes" $ listRecipes pool                                      
 
-                get "/craftbeer/recipe/ingredients/:id" $ do  
+                get "/craftbeer/recipe/:id/ingredients" $ do  
                                                             idd <- param "id" :: ActionM TL.Text
                                                             getIngredientRecipe pool idd   
                 
-                get "/craftbeer/recipe/stages/:id" $ do  
+                get "/craftbeer/recipe/:id/stages" $ do  
                                                         idd <- param "id" :: ActionM TL.Text
                                                         getStagesRecipe pool idd                                                              
                                                 
