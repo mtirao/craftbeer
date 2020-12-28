@@ -21,7 +21,7 @@ import GHC.Int
 instance DbOperation Stage where
     insert pool (Just (Stage _ recipeid recipe_type temp time)) = do
         res <- fetch pool (recipeid, recipe_type, temp, time)
-                            "INSERT INTO stages(recipeid, type, temp, time) VALUES(?,?,?,?) RETURNING  id, recipeid, type, temp, time" :: IO [(Maybe Integer, Integer, Integer, Integer, Integer )]
+                            "INSERT INTO stages(recipe, type, temp, time) VALUES(?,?,?,?) RETURNING  id, recipe, type, temp, time" :: IO [(Maybe Integer, Integer, Integer, Integer, Integer )]
         return $ oneStage res
             where oneStage ((id, recipeid, recipe_type, temp, time) : _) = Just $ Stage id recipeid recipe_type temp time
                   oneStage _ = Nothing
@@ -47,4 +47,9 @@ instance DbOperation Stage where
 deleteStage :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
 deleteStage pool id = do 
                         _ <- liftIO $ execSqlT pool [id] "DELETE FROM stages WHERE id=?"
+                        return ()
+
+deleteStageByRecipe :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
+deleteStageByRecipe pool id = do 
+                        _ <- liftIO $ execSqlT pool [id] "DELETE FROM stages WHERE recipe=?"
                         return ()

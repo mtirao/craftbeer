@@ -77,7 +77,7 @@ instance ToJSON Stage where
 
 instance FromJSON Stage where
     parseJSON (Object v) = Stage <$>
-        v .:  "id" <*>
+        v .:?  "id" <*>
         v .:  "recipe" <*>
         v .:  "type" <*>
         v .:  "temp" <*>

@@ -48,3 +48,8 @@ deleteIngredient pool id = do
                                 _ <- liftIO $ execSqlT pool [id] "DELETE FROM ingredients WHERE id=?"
                                 return ()
 
+deleteIngredientByRecipe :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
+deleteIngredientByRecipe pool id = do 
+                                _ <- liftIO $ execSqlT pool [id] "DELETE FROM ingredients WHERE recipe=?"
+                                return ()
+
