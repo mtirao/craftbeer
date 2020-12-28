@@ -6,6 +6,8 @@ module Controller.RecipesController where
 import Domain
 import Views
 import Db.Recipes
+import Db.Ingredients
+import Db.Stages
 import Db.Db
 
 import Web.Scotty
@@ -85,5 +87,7 @@ getStagesRecipe pool idd = do
 
 ---DELETE
 deleteRecipeId pool idd = do
+                            deleteIngredientByRecipe pool idd
+                            deleteStageByRecipe pool idd
                             deleteRecipe pool idd
                             status status204
