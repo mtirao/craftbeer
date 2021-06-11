@@ -1,0 +1,10 @@
+POST http://localhost:3000/craftbeer/recipe HTTP/1.1
+content-type: application/json
+
+{
+    "style": "new",
+    "name" : "new",
+    "ibu" : 1,
+    "abv" : 1,
+    "color" : 1
+}

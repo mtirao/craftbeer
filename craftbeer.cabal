@@ -26,6 +26,7 @@ executable          craftbeer
                     , lens-aeson                    >=1.0.2
                     , wreq                          >=0.5.3.2
                     , http-types
+                    , time
 
     other-modules: 
         Auth 

@@ -19,6 +19,27 @@ import qualified Data.Text as T
 import GHC.Int
 
 
+instance DbOperation RecipeCooking where
+    insert pool (Just (RecipeCooking _ recipe state)) = do
+        res <- fetch pool (recipe, state)
+                            "INSERT INTO recipes_cooking(recipe_id, state) VALUES(?,?) RETURNING  id, recipe_id, state" :: IO [(Maybe Integer, Integer, TL.Text)]
+        return $ oneRecipeCooking res
+
+    update pool (Just (RecipeCooking _ _ state)) idd= do
+        res <- fetch pool (state, idd)
+                            "UPDATE recipes_cooking SET state=? WHERE id=? RETURNING  id, recipe_id, state" :: IO [(Maybe Integer, Integer, TL.Text)]
+        return $ oneRecipeCooking res
+    
+    find pool id = do 
+                    res <- fetch pool (Only id) "SELECT id, recipe_id, state FROM recipes_cooking WHERE id=?" :: IO [(Maybe Integer, Integer, TL.Text)]
+                    return $ oneRecipeCooking res
+
+    list pool = do
+                    res <- fetchSimple pool "SELECT id, recipe_id, state FROM recipes_cooking" :: IO [(Maybe Integer, Integer, TL.Text)]
+                    return $ map (\(id, recipeId, state) -> RecipeCooking id recipeId state) res
+
+
+
 instance DbOperation Recipe where
     insert pool (Just (Recipe _ style name ibu abv color)) = do
         res <- fetch pool (style, name, ibu, abv, color)
@@ -38,9 +59,14 @@ instance DbOperation Recipe where
                     res <- fetchSimple pool "SELECT id, style, name, ibu, abv, color FROM recipes" :: IO [(Maybe Integer, TL.Text, TL.Text, Integer, Integer, Integer )]
                     return $ map (\(id, style, name, ibu, abv, color) -> Recipe id style name ibu abv color) res
 
+findRecipeCooking :: Pool Connection -> TL.Text -> IO (Maybe Integer)
+findRecipeCooking pool state = do
+                                [Only i] <- fetch pool (Only state) "SELECT count(*) FROM recipes_cooking WHERE state=?" :: IO [Only Integer]
+                                return $ countRecipe i
+
 
 findIngredient pool idd = do
-                            res <- fetch pool (Only idd) "SELECT id, recipe, name, type, unit, value FROM ingredients WHERE recipe=?" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
+                            res <- fetch pool (Only idd) "SELECT count(name) FROM  WHERE recipe=?" :: IO [(Maybe Integer, Integer, TL.Text, TL.Text, Integer, Integer)]
                             return $ map (\(id, recipe, name, ingredienttype, unit, value) -> Ingredient id recipe name ingredienttype unit value) res
 
 findStage pool idd = do
@@ -48,9 +74,17 @@ findStage pool idd = do
                         return $ map (\(id, recipeid, recipe_type, temp, time) -> Stage id recipeid recipe_type temp time) res
 
 -- Function to convert tuple -> Maybe Ingredient
+
+countRecipe :: Integer -> Maybe Integer
+countRecipe i = if i > 0 then Just i else Nothing
+
 oneRecipe :: [(Maybe Integer, TL.Text, TL.Text, Integer, Integer, Integer)] -> Maybe Recipe
 oneRecipe ((id, style, name, ibu, abv, color) : _) = Just $ Recipe id style name ibu abv color
 oneRecipe _ = Nothing
+
+oneRecipeCooking :: [(Maybe Integer, Integer, TL.Text)] -> Maybe RecipeCooking
+oneRecipeCooking ((id, recipe_id, state) : _) = Just $ RecipeCooking id recipe_id state
+oneRecipeCooking _ = Nothing
 
 deleteRecipe :: Pool Connection -> TL.Text -> ActionT TL.Text IO ()
 deleteRecipe pool id = do 

@@ -14,6 +14,7 @@ import Data.Text.Lazy.Encoding
 import Data.Aeson
 import Control.Applicative
 import GHC.Generics
+import Data.Time.LocalTime
 
 -- Request Json
 -- Error
@@ -84,6 +85,39 @@ instance FromJSON Stage where
         v .:  "time"
 
 
+-- Stage Cooking
+data StageCooking = StageCooking{
+    stageCookingId:: Maybe Integer
+    ,stage_belong_to :: Integer
+    ,stage_recipe_id :: Integer
+    ,stage_cooking_type :: Integer
+    ,start_time :: LocalTime
+    ,end_time :: LocalTime
+    ,state :: Text
+} deriving (Show)
+
+instance ToJSON StageCooking where
+    toJSON (StageCooking stageId belong_to stage_id stage_type start_time end_time state) = object
+        [
+            "id" .= stageId,
+            "recipe" .= belong_to,
+            "stage_id" .= stage_id,
+            "type" .= stage_type,
+            "start_time" .= start_time,
+            "end_time" .= end_time,
+            "state" .= state
+        ]
+
+instance FromJSON StageCooking where
+    parseJSON (Object v) = StageCooking <$>
+        v .:?  "id" <*>
+        v .:  "recipe" <*>
+        v .:  "stage_id" <*>
+        v .:  "type" <*>
+        v .:  "start_time" <*>
+        v .:  "end_time" <*>
+        v .:  "state"
+
 -- Sensosrs
 data Sensor = Sensor {
     sensorId :: Maybe Integer
@@ -126,6 +160,27 @@ instance ToJSON Recipe where
             ,"color" .= color
         ]
 
+-- Recipes Cooking
+data RecipeCooking = RecipeCooking {
+    recipe_id :: Maybe Integer
+    ,recipe_cooking_id :: Integer
+    ,recipe_state :: Text
+} deriving (Show, Generic)
+
+
+instance FromJSON RecipeCooking where
+    parseJSON (Object v) = RecipeCooking <$>
+        v .:?  "id" <*>
+        v .:  "recipe" <*>
+        v .:  "state"
+
+instance ToJSON RecipeCooking where
+    toJSON RecipeCooking {..} = object 
+        [
+            "id" .= recipe_id
+            ,"recipe" .= recipe_cooking_id
+            ,"state" .= recipe_state
+        ]
 
 -- Ingredient
 data Ingredient = Ingredient {

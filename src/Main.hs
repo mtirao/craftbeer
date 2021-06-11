@@ -103,7 +103,17 @@ main = do
                                                         where stageResponse = do
                                                                                     jsonResponse a
                                                                                     status status201 
-                                            
+
+                post "/craftbeer/stage/cooking" $ do
+                                                    b <- body
+                                                    stage <- return $ (decode b :: Maybe StageCooking)
+                                                    dbStage <- liftIO $ insert pool stage
+                                                    case dbStage of 
+                                                        Nothing -> status status400
+                                                        Just a -> stageResponse 
+                                                                where stageResponse = do
+                                                                                            jsonResponse a
+                                                                                            status status201                   
 
                 -- SENSORS
 
@@ -135,6 +145,9 @@ main = do
 
                 -- RECIPES
                 post "/craftbeer/recipe" $ createRecipe pool body
+                post "/craftbeer/recipe/cooking" $ createRecipeCooking pool body
+                                                   
+
                 put "/craftbeer/recipe/:id" $ do 
                                                 idd <- param "id" :: ActionM TL.Text
                                                 updateRecipe pool body idd
@@ -155,7 +168,8 @@ main = do
                 
                 get "/craftbeer/recipe/:id/stages" $ do  
                                                         idd <- param "id" :: ActionM TL.Text
-                                                        getStagesRecipe pool idd                                                              
+                                                        getStagesRecipe pool idd     
+                                                         
                                                 
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ createIngredient pool body 

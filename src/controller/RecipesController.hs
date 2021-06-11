@@ -48,6 +48,28 @@ createRecipeResponse pool rcpe = do
                                             where dbRecipeResponse = do
                                                                     jsonResponse a
                                                                     status status201 
+
+createRecipeCooking pool cbody = do
+                                    b <- cbody
+                                    rcpe <- return $ (decode b :: Maybe RecipeCooking)
+                                    case rcpe of
+                                        Nothing -> status status400
+                                        Just recipe -> do
+                                            countRecipe <- liftIO $ (findRecipeCooking pool (recipe_state recipe) :: IO (Maybe Integer))
+                                            case countRecipe of
+                                                Just _ -> status status400
+                                                Nothing -> createRecipeCookingResponse pool rcpe   
+                                                                                  
+
+createRecipeCookingResponse pool rcpe = do 
+                                dbRecipe <- liftIO $ insert pool rcpe
+                                case dbRecipe of
+                                    Nothing -> status status400
+                                    Just a -> dbRecipeResponse 
+                                            where dbRecipeResponse = do
+                                                                    jsonResponse a
+                                                                    status status201                               
+
 ----UPDATE
 updateRecipe pool ubody idd  = do
                             b <- ubody
