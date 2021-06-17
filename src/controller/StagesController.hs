@@ -29,23 +29,7 @@ import Network.HTTP.Types.Status
 
 import Data.Aeson
 
------CREATE
-createStage pool cbody  = do
-                            b <- cbody
-                            rcpe <- return $ (decode b :: Maybe Stage)
-                            case rcpe of
-                                Nothing -> status status400
-                                Just _ -> createStageResponse pool rcpe
-                                         
 
-createStageResponse pool rcpe = do 
-                                dbStage <- liftIO $ insert pool rcpe
-                                case dbStage of
-                                    Nothing -> status status400
-                                    Just a -> dbStageResponse 
-                                            where dbStageResponse = do
-                                                                    jsonResponse a
-                                                                    status status201 
 ----UPDATE
 updateStage pool ubody idd  = do
                             b <- ubody
@@ -78,3 +62,31 @@ getStage pool idd = do
 deleteStageId pool idd = do
                             deleteStage pool idd
                             status status204
+
+---DELETE
+deleteAllStageCooking pool idd = do
+                            deleteStageRecipeCooking pool idd
+                            status status204
+
+-- POST
+createStageCooking pool= do
+                            b <- body
+                            stage <- return $ (decode b :: Maybe StageCooking)
+                            dbStage <- liftIO $ insert pool stage
+                            case dbStage of 
+                                Nothing -> status status400
+                                Just a -> stageResponse 
+                                        where stageResponse = do
+                                                                    jsonResponse a
+                                                                    status status201
+
+createStage pool = do
+                    b <- body
+                    stage <- return $ (decode b :: Maybe Stage)
+                    dbStage <- liftIO $ insert pool stage
+                    case dbStage of 
+                        Nothing -> status status400
+                        Just a -> stageResponse 
+                                where stageResponse = do
+                                                            jsonResponse a
+                                                            status status201 

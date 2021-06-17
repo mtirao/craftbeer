@@ -70,7 +70,7 @@ findIngredient pool idd = do
                             return $ map (\(id, recipe, name, ingredienttype, unit, value) -> Ingredient id recipe name ingredienttype unit value) res
 
 findStage pool idd = do
-                        res <- fetch pool (Only idd) "SELECT id, recipe, type, temp, time FROM stages WHERE recipe=?" :: IO [(Maybe Integer, Integer, Integer, Integer, Integer )]
+                        res <- fetch pool (Only idd) "SELECT id, recipe, type, temp, time FROM stages WHERE recipe=? ORDER By type ASC" :: IO [(Maybe Integer, Integer, Integer, Integer, Integer )]
                         return $ map (\(id, recipeid, recipe_type, temp, time) -> Stage id recipeid recipe_type temp time) res
 
 -- Function to convert tuple -> Maybe Ingredient

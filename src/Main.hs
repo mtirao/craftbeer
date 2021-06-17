@@ -93,31 +93,20 @@ main = do
                                                                                     status status201 
 
                 -- STAGES
-                post "/craftbeer/stage" $ do
-                                            b <- body
-                                            stage <- return $ (decode b :: Maybe Stage)
-                                            dbStage <- liftIO $ insert pool stage
-                                            case dbStage of 
-                                                Nothing -> status status400
-                                                Just a -> stageResponse 
-                                                        where stageResponse = do
-                                                                                    jsonResponse a
-                                                                                    status status201 
+                post "/craftbeer/stage" $ createStage pool
+                
 
-                post "/craftbeer/stage/cooking" $ do
-                                                    b <- body
-                                                    stage <- return $ (decode b :: Maybe StageCooking)
-                                                    dbStage <- liftIO $ insert pool stage
-                                                    case dbStage of 
-                                                        Nothing -> status status400
-                                                        Just a -> stageResponse 
-                                                                where stageResponse = do
-                                                                                            jsonResponse a
-                                                                                            status status201                   
+                post "/craftbeer/stage/cooking" $ createStageCooking pool              
+
+
+                delete "/craftbeer/stages/cooking/recipe/:id" $ do 
+                                                                    idd <- param "id" :: ActionM TL.Text
+                                                                    deleteAllStageCooking pool idd
 
                 -- SENSORS
 
                 post "/craftbeer/sensor" $ createSensor pool body
+
                 put "/craftbeer/sensor/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     updateSensor pool body idd
@@ -145,9 +134,9 @@ main = do
 
                 -- RECIPES
                 post "/craftbeer/recipe" $ createRecipe pool body
+
                 post "/craftbeer/recipe/cooking" $ createRecipeCooking pool body
                                                    
-
                 put "/craftbeer/recipe/:id" $ do 
                                                 idd <- param "id" :: ActionM TL.Text
                                                 updateRecipe pool body idd
@@ -173,6 +162,7 @@ main = do
                                                 
                 -- INGREDIENTS
                 post "/craftbeer/ingredient" $ createIngredient pool body 
+
                 put "/craftbeer/ingredient/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     updateRecipe pool body idd
@@ -212,6 +202,9 @@ getLoginParam :: ActionT TL.Text IO (Maybe Login)
 getLoginParam = do 
                     b <- body
                     return $ (decode b :: Maybe Login)
+
+
+
 
 
               
