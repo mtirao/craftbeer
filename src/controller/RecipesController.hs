@@ -92,6 +92,10 @@ listRecipes pool =  do
                         recipes <- liftIO $ (list pool :: IO [Recipe])
                         jsonResponse recipes 
 
+listRecipesCooking pool =  do
+                        recipes <- liftIO $ (list pool :: IO [RecipeCooking])
+                        jsonResponse recipes 
+
 getRecipe pool idd = do 
                         maybeRecipe <- liftIO $ (find pool idd :: IO (Maybe Recipe))
                         case maybeRecipe of

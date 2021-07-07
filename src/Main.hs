@@ -93,35 +93,35 @@ main = do
                                                                                     status status201 
 
                 -- STAGES
-                post "/craftbeer/stage" $ createStage pool
+                post "/api/craftbeer/stage" $ createStage pool
                 
 
-                post "/craftbeer/stage/cooking" $ createStageCooking pool              
+                post "/api/craftbeer/stage/cooking" $ createStageCooking pool              
 
 
-                delete "/craftbeer/stages/cooking/recipe/:id" $ do 
+                delete "/api/craftbeer/stages/cooking/recipe/:id" $ do 
                                                                     idd <- param "id" :: ActionM TL.Text
                                                                     deleteAllStageCooking pool idd
 
                 -- SENSORS
 
-                post "/craftbeer/sensor" $ createSensor pool body
+                post "/api/craftbeer/sensor" $ createSensor pool body
 
-                put "/craftbeer/sensor/:id" $ do 
+                put "/api/craftbeer/sensor/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     updateSensor pool body idd
 
-                delete "/craftbeer/sensor/:id" $ do 
+                delete "/api/craftbeer/sensor/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteSensorId pool idd
 
-                get "/craftbeer/sensor/:id" $ do
+                get "/api/craftbeer/sensor/:id" $ do
                                                     idd <- param "id" :: ActionM TL.Text
                                                     getSensor pool idd
 
-                get "/craftbeer/sensor" $ listSensors pool
+                get "/api/craftbeer/sensor" $ listSensors pool
 
-                post "/craftbeer/sensor" $ do
+                post "/api/craftbeer/sensor" $ do
                                             b <- body
                                             sensor <- return $ (decode b :: Maybe Sensor)
                                             dbSensor <- liftIO $ insert pool sensor
@@ -133,66 +133,69 @@ main = do
                                                                                     status status201  
 
                 -- RECIPES
-                post "/craftbeer/recipe" $ createRecipe pool body
+                post "/api/craftbeer/recipe/cooking" $ createRecipeCooking pool body
 
-                post "/craftbeer/recipe/cooking" $ createRecipeCooking pool body
+                get "/api/craftbeer/recipe/cooking" $ listRecipesCooking pool
+
+
+                post "/api/craftbeer/recipe" $ createRecipe pool body
                                                    
-                put "/craftbeer/recipe/:id" $ do 
+                put "/api/craftbeer/recipe/:id" $ do 
                                                 idd <- param "id" :: ActionM TL.Text
                                                 updateRecipe pool body idd
                                                 
-                delete "/craftbeer/recipe/:id" $ do 
+                delete "/api/craftbeer/recipe/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteRecipeId pool idd
                                                     
-                get "/craftbeer/recipe/:id" $ do   
+                get "/api/craftbeer/recipe/:id" $ do   
                                                 idd <- param "id" :: ActionM TL.Text
                                                 getRecipe pool idd
 
-                get "/craftbeer/recipes" $ listRecipes pool                                      
+                get "/api/craftbeer/recipes" $ listRecipes pool                                      
 
-                get "/craftbeer/recipe/:id/ingredients" $ do  
+                get "/api/craftbeer/recipe/:id/ingredients" $ do  
                                                             idd <- param "id" :: ActionM TL.Text
                                                             getIngredientRecipe pool idd   
                 
-                get "/craftbeer/recipe/:id/stages" $ do  
+                get "/api/craftbeer/recipe/:id/stages" $ do  
                                                         idd <- param "id" :: ActionM TL.Text
                                                         getStagesRecipe pool idd     
                                                          
                                                 
                 -- INGREDIENTS
-                post "/craftbeer/ingredient" $ createIngredient pool body 
+                post "/api/craftbeer/ingredient" $ createIngredient pool body 
 
-                put "/craftbeer/ingredient/:id" $ do 
+                put "/api/craftbeer/ingredient/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     updateRecipe pool body idd
 
-                delete "/craftbeer/ingredient/:id" $ do 
+                delete "/api/craftbeer/ingredient/:id" $ do 
                                                         idd <- param "id" :: ActionM TL.Text
                                                         deleteIngredientId pool idd
 
-                get "/craftbeer/ingredient/:id" $ do
+                get "/api/craftbeer/ingredient/:id" $ do
                                                     idd <- param "id" :: ActionM TL.Text
                                                     getIngredient pool idd
 
-                get "/craftbeer/ingredients" $ listIngredients pool
+                get "/api/craftbeer/ingredients" $ listIngredients pool
 
 
                 -- AGENTS
-                post "/craftbeer/agent" $ createAgent pool body
-                put "/craftbeer/agent/:id" $ do 
+                post "/api/craftbeer/agent" $ createAgent pool body
+                put "/api/craftbeer/agent/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     updateAgent pool body idd
 
-                delete "/craftbeer/agent/:id" $ do 
+                delete "/api/craftbeer/agent/:id" $ do 
                                                     idd <- param "id" :: ActionM TL.Text
                                                     deleteAgentId pool idd
 
-                get "/craftbeer/agent/:id" $ do
+                get "/api/craftbeer/agent/:id" $ do
                                                     idd <- param "id" :: ActionM TL.Text
                                                     getAgent pool idd
 
-                get "/craftbeer/agent" $ listAgents pool
+                get "/api/craftbeer/agent" $ listAgents pool
               
                 
 -----------------------------------------------
