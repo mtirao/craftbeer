@@ -74,7 +74,7 @@ execSqlT pool args sql = withResource pool ins
 
 --------------------------------------------------------------------------------
 
-findUserByLogin :: Pool Connection -> String -> IO (Maybe User)
+findUserByLogin :: Pool Connection -> String -> IO (Maybe Profile)
 findUserByLogin pool login = do
          res <- liftIO $ fetch pool (Only login) "SELECT role, password, username, name, lastname FROM users WHERE username=?" :: IO [(String, String, String, String, String)]
          return $ userResponse res
